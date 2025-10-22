@@ -1,0 +1,7 @@
+{
+  "name": "team-5-mobile-apps",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
