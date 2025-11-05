@@ -1,0 +1,63 @@
+<div class="swipe-container">
+  <div *ngIf="!events.length" class="empty">No events right now</div>
+
+  <ng-container *ngFor="let ev of events; let i = index">
+    <div
+      class="card"
+      [class.top]="i === 0"
+      [style.zIndex]="events.length - i"
+      *ngIf="i < 4"
+      (pointerdown)="i === 0 ? onPointerDown($event) : null"
+      (pointermove)="i === 0 ? onPointerMove($event) : null"
+      (pointerup)="i === 0 ? onPointerUp($event) : null"
+      [attr.data-index]="i"
+      [attr.aria-hidden]="i !== 0"
+      #topCard
+      [ngStyle]="getCardStyle(i)"
+    >
+      <div class="card-image" [style.backgroundImage]="'url(' + ev.image + ')'">
+        <div class="card-meta">
+          <h2>{{ ev.name }}</h2>
+          <span class="category">{{ ev.category }}</span>
+        </div>
+        <!-- swipe indicators -->
+        <div class="indicator like" [style.opacity]="translateX > 0 ? indicatorOpacity : 0">
+          <ion-icon name="checkmark-circle"></ion-icon>
+        </div>
+        <div class="indicator dislike" [style.opacity]="translateX < 0 ? indicatorOpacity : 0">
+          <ion-icon name="close-circle"></ion-icon>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="desc">{{ ev.description }}</p>
+        <p class="meta">
+          <span class="participants">{{ ev.minParticipants }} - {{ ev.maxParticipants }} people</span>
+          <span class="dot">•</span>
+          <time class="date">{{ ev.date | date:'mediumDate' }}</time>
+        </p>
+      </div>
+      <!-- controls inside the card for the top card only -->
+      <div class="controls" *ngIf="i === 0">
+        <div class="action-pill">
+          <ion-button fill="clear" class="action-btn dislike" (click)="onDislike()" aria-label="Dislike">
+            <div class="circle">
+              <ion-icon name="close" slot="icon-only"></ion-icon>
+            </div>
+          </ion-button>
+
+          <ion-button fill="clear" class="action-btn save" (click)="onSave()" aria-label="Save">
+            <div class="circle">
+              <ion-icon name="star" slot="icon-only"></ion-icon>
+            </div>
+          </ion-button>
+
+          <ion-button fill="clear" class="action-btn like" (click)="onLike()" aria-label="Like">
+            <div class="circle">
+              <ion-icon name="heart" slot="icon-only"></ion-icon>
+            </div>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

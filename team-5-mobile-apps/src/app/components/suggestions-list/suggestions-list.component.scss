@@ -1,0 +1,4 @@
+.avatar { --size: 40px; }
+.initials { width: 40px; height: 40px; border-radius: 50%; display:flex; align-items:center; justify-content:center; background: rgba(142,76,255,0.12); color: rgba(72,0,120,0.9); font-weight:600; }
+ion-item { --min-height: 56px; }
+ion-button[color="tertiary"] { background: #7a4de6; color: #fff; border-radius: 16px; }

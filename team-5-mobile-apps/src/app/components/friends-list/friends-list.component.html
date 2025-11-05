@@ -1,0 +1,17 @@
+<ng-container *ngIf="activeSegment === 'friends'">
+  <ion-searchbar placeholder="Search by username"></ion-searchbar>
+  <ion-list lines="none">
+    <ion-item *ngFor="let f of friends$ | async; trackBy: trackById" button>
+      <ion-avatar slot="start" class="avatar">
+        <div class="initials">{{ initials(f.name) }}</div>
+      </ion-avatar>
+      <ion-label>
+        <h3>{{ f.name }}</h3>
+        <p class="muted">{{ f.lastMessage }}</p>
+      </ion-label>
+      <div slot="end" class="meta">
+        <div class="time">{{ f.lastSeen }}</div>
+      </div>
+    </ion-item>
+  </ion-list>
+</ng-container>

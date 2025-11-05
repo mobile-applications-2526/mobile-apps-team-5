@@ -1,0 +1,15 @@
+<ng-container *ngIf="activeSegment === 'add'">
+  <ion-searchbar placeholder="Search by username"></ion-searchbar>
+  <div class="suggestions-label">Suggestions</div>
+  <ion-list lines="none">
+    <ion-item *ngFor="let s of suggestions$ | async" lines="none">
+      <ion-avatar slot="start" class="avatar">
+        <div class="initials">{{ initials(s.name) }}</div>
+      </ion-avatar>
+      <ion-label>
+        <h3>{{ s.name }}</h3>
+      </ion-label>
+      <ion-button slot="end" size="small" fill="solid" color="tertiary" (click)="add(s.id, s.name)">Add</ion-button>
+    </ion-item>
+  </ion-list>
+</ng-container>

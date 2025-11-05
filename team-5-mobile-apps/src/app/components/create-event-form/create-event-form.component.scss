@@ -1,0 +1,104 @@
+/* Mobile-first responsive form styles */
+.create-form-wrap {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  max-width: 720px; /* keeps it constrained on tablets/desktop */
+  margin: 0 auto;
+}
+
+.create-form-wrap ion-card {
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.create-form-wrap ion-card-header,
+.create-form-wrap ion-card-content {
+  padding: 10px 8px;
+}
+
+.create-form-wrap ion-item {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --inner-padding-end: 8px;
+}
+
+.create-form-wrap ion-label {
+  font-size: 0.92rem;
+}
+
+.create-form-wrap ion-input,
+.create-form-wrap ion-textarea,
+.create-form-wrap ion-select,
+.create-form-wrap ion-datetime {
+  font-size: 0.96rem;
+}
+
+.participants {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.participants .col {
+  flex: 1;
+}
+
+.actions {
+  margin-top: 12px;
+}
+
+.actions ion-button {
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+}
+
+.success {
+  margin-top: 10px;
+  color: var(--ion-color-success);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.image-name {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+/* Narrow screens: stack participant inputs and reduce spacing */
+@media (max-width: 480px) {
+  .create-form-wrap {
+    padding: 8px;
+  }
+  .create-form-wrap ion-card-header,
+  .create-form-wrap ion-card-content {
+    padding: 8px;
+  }
+  .participants {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .create-form-wrap ion-label {
+    font-size: 0.88rem;
+  }
+  .create-form-wrap ion-input,
+  .create-form-wrap ion-textarea {
+    font-size: 0.95rem;
+  }
+  .actions ion-button {
+    font-size: 0.95rem;
+  }
+}
+
+/* Slight adjustments for very small screens */
+@media (max-width: 360px) {
+  .create-form-wrap ion-card-header,
+  .create-form-wrap ion-card-content {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  .create-form-wrap ion-label {
+    font-size: 0.85rem;
+  }
+}

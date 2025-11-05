@@ -1,0 +1,41 @@
+.avatar {
+  --size: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.initials {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(142, 76, 255, 0.12); /* light purple */
+  color: rgba(72, 0, 120, 0.9);
+  font-weight: 600;
+}
+
+ion-item h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+ion-item p.muted {
+  margin: 2px 0 0 0;
+  font-size: 0.88rem;
+  color: var(--ion-color-medium);
+}
+.meta .time {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+/* Slight spacing tweaks for compact list */
+ion-list {
+  padding-top: 8px;
+}
+ion-item {
+  --inner-padding-end: 12px;
+  --inner-padding-start: 12px;
+  --min-height: 62px;
+}

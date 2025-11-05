@@ -1,0 +1,17 @@
+<ng-container *ngIf="activeSegment === 'chats'">
+  <ion-list lines="none">
+    <ion-item *ngFor="let c of chats$ | async; trackBy: trackById" button (click)="markRead(c.id)">
+      <ion-avatar slot="start" class="avatar">
+        <div class="initials">{{ initials(c.name) }}</div>
+      </ion-avatar>
+      <ion-label>
+        <h3>{{ c.name }}</h3>
+        <p class="muted">{{ c.lastMessage }}</p>
+      </ion-label>
+      <div slot="end" class="meta">
+        <div class="time">{{ c.time }}</div>
+        <ion-badge *ngIf="c.unread && c.unread > 0" color="danger">{{ c.unread }}</ion-badge>
+      </div>
+    </ion-item>
+  </ion-list>
+</ng-container>

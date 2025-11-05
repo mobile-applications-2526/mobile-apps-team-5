@@ -1,0 +1,63 @@
+<ng-container *ngIf="(profile$ | async) as profile">
+  <div class="profile-top">
+    <ion-avatar class="big-avatar">
+      <div class="initials">{{ getInitials(profile) }}</div>
+    </ion-avatar>
+    <div class="counts">
+      <div class="count"> <div class="num">{{ profile.following }}</div><div class="label">Following</div></div>
+      <div class="count"> <div class="num">{{ profile.followers }}</div><div class="label">Followers</div></div>
+    </div>
+  </div>
+
+  <div class="profile-body">
+    <h2>{{ profile.name }}</h2>
+    <div class="location">{{ profile.location }}</div>
+
+    <div class="section">
+      <div class="section-header">
+        <span>Self-introduction</span>
+        <ion-button fill="clear" size="small" (click)="toggleEdit()"><ion-icon name="create"></ion-icon></ion-button>
+      </div>
+      <div *ngIf="!edit" class="bio-box">{{ profile.bio || 'Add Bio' }}</div>
+      <form *ngIf="edit" [formGroup]="form">
+        <ion-item>
+          <ion-textarea formControlName="bio"></ion-textarea>
+        </ion-item>
+        <div class="actions">
+          <ion-button fill="clear" (click)="toggleEdit()">Cancel</ion-button>
+          <ion-button (click)="save()">Save</ion-button>
+        </div>
+      </form>
+    </div>
+
+    <div class="section">
+      <h3>Interests</h3>
+      <div class="chips">
+        <ion-chip *ngFor="let i of profile.interests">{{ i }}</ion-chip>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Languages</h3>
+      <div class="chips">
+        <ion-chip *ngFor="let l of profile.languages">{{ l }}</ion-chip>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Upcoming activities</h3>
+      <div *ngFor="let a of profile.upcomingActivities" class="activity-card">
+        <h4>{{ a.title }}</h4>
+        <div class="meta">📅 {{ a.date }} • 📍 {{ a.place }}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Past activities</h3>
+      <div *ngFor="let a of profile.pastActivities" class="activity-card">
+        <h4>{{ a.title }}</h4>
+        <div class="meta">📅 {{ a.date }} • 📍 {{ a.place }}</div>
+      </div>
+    </div>
+  </div>
+</ng-container>

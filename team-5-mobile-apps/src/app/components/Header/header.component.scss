@@ -1,0 +1,16 @@
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: transparent;
+}
+
+.left, .right { width: 44px; display:flex; align-items:center; }
+
+.center { flex: 1; text-align: center; display:flex; align-items:center; justify-content:center; gap:8px }
+
+.title { font-size: 20px; font-weight: 700; }
+.display-name { font-size: 14px; color: #666 }
+
+ion-button { --padding-start: 0; --padding-end: 0 }

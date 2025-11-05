@@ -1,0 +1,33 @@
+<div class="saved-card-component">
+  <div class="thumb" [style.background-image]="'url(' + event.image + ')'" role="img" aria-label="{{event.name}}"></div>
+  <div class="info">
+    <div class="row top">
+      <h3>{{ event.name }}</h3>
+      <div class="icons">
+        <button class="icon-btn star" (click)="toggleStar()" [attr.aria-pressed]="event.starred">
+          <ion-icon [name]="event.starred ? 'star' : 'star-outline'"></ion-icon>
+        </button>
+        <button class="icon-btn heart" (click)="remove()" aria-label="Remove saved">
+          <ion-icon name="heart"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <p class="meta-row">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <span class="date">{{ event.date | date:'MMM d' }}</span>
+      <ion-icon name="people-outline"></ion-icon>
+      <span class="parts">{{ participantsLabel }}</span>
+    </p>
+
+    <p class="location">
+      <ion-icon name="location-outline"></ion-icon>
+      <span>{{ event.location || event.category }}</span>
+    </p>
+
+    <p class="friends" *ngIf="event.friendsInterested && event.friendsInterested > 0">
+      <span class="friends-count">{{ event.friendsInterested }} friends are interested</span>
+      <ion-icon name="people-circle"></ion-icon>
+    </p>
+  </div>
+</div>

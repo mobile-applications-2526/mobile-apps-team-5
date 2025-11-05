@@ -1,0 +1,35 @@
+/* Styles for Friends page */
+:host {
+  display: block;
+}
+
+.top-segment {
+  --background: transparent;
+  padding: 6px 8px;
+  background: transparent;
+}
+.top-segment ion-segment-button {
+  min-width: 90px;
+  border-radius: 6px;
+}
+.top-segment ion-segment-button[aria-pressed="true"] {
+  background: #d9c3ff; /* light purple */
+}
+
+.search-wrap {
+  padding: 10px 12px;
+}
+.search-wrap ion-searchbar {
+  --background: #fff;
+  border-radius: 12px;
+}
+
+.friends-body {
+  background: rgba(245, 235, 250, 0.6); /* very light purple */
+  min-height: calc(100vh - 220px);
+}
+.suggestions-label {
+  padding: 8px 12px;
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+}

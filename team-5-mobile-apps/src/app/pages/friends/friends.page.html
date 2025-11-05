@@ -1,0 +1,39 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Friends
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Friends</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <app-header name="Friends"></app-header>
+  
+  <!-- simple segmented control like design in screenshot -->
+  <ion-segment [(ngModel)]="segment" class="top-segment">
+    <ion-segment-button value="friends">
+      <ion-icon name="people"></ion-icon>
+      <div>Friends</div>
+    </ion-segment-button>
+    <ion-segment-button value="chats">
+      <ion-icon name="chatbubbles"></ion-icon>
+      <div>Chats</div>
+    </ion-segment-button>
+    <ion-segment-button value="add">
+      <ion-icon name="person-add"></ion-icon>
+      <div>Add</div>
+    </ion-segment-button>
+  </ion-segment>
+
+  <div class="friends-body">
+    <app-chats-list [activeSegment]="segment"></app-chats-list>
+    <app-friends-list [activeSegment]="segment"></app-friends-list>
+    <app-suggestions-list [activeSegment]="segment"></app-suggestions-list>
+  </div>
+</ion-content>

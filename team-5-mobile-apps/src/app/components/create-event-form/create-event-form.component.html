@@ -1,0 +1,69 @@
+<div class="create-form-wrap">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Create Activity</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+        <ion-item>
+          <ion-label position="stacked">Name</ion-label>
+          <ion-input formControlName="name" placeholder="Value"></ion-input>
+        </ion-item>
+        <ion-text color="danger" *ngIf="f.name.touched && f.name.invalid">
+          <small *ngIf="f.name.errors?.['required']">Name is required.</small>
+          <small *ngIf="f.name.errors?.['minlength']">Name must be at least 3 characters.</small>
+        </ion-text>
+
+        <ion-item>
+          <ion-label position="stacked">Category</ion-label>
+          <ion-select formControlName="category" placeholder="Select">
+            <ion-select-option *ngFor="let c of categories" [value]="c.val">{{ c.label }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-text color="danger" *ngIf="f.category.touched && f.category.invalid"><small>Category is required.</small></ion-text>
+
+        <ion-item>
+          <ion-label position="stacked">Description</ion-label>
+          <ion-textarea formControlName="description" placeholder="Value"></ion-textarea>
+        </ion-item>
+        <ion-text color="danger" *ngIf="f.description.touched && f.description.invalid">
+          <small *ngIf="f.description.errors?.['required']">Description is required.</small>
+          <small *ngIf="f.description.errors?.['minlength']">Description must be at least 10 characters.</small>
+        </ion-text>
+
+        <div class="participants">
+          <div class="col">
+            <ion-label>Min</ion-label>
+            <ion-input type="number" formControlName="minParticipants" placeholder="Value"></ion-input>
+            <ion-text color="danger" *ngIf="f.minParticipants.touched && f.minParticipants.invalid"><small *ngIf="f.minParticipants.errors?.['required']">Required</small></ion-text>
+          </div>
+          <div class="col">
+            <ion-label>Max</ion-label>
+            <ion-input type="number" formControlName="maxParticipants" placeholder="Value"></ion-input>
+            <ion-text color="danger" *ngIf="f.maxParticipants.touched && f.maxParticipants.invalid"><small *ngIf="f.maxParticipants.errors?.['required']">Required</small></ion-text>
+          </div>
+        </div>
+  <ion-text color="danger" *ngIf="form.errors?.['minGreaterThanMax']"><small>Min must be less than or equal to Max.</small></ion-text>
+
+        <ion-item>
+          <ion-label position="stacked">Date proposal</ion-label>
+          <ion-datetime presentation="date" formControlName="date"></ion-datetime>
+        </ion-item>
+        <ion-text color="danger" *ngIf="f.date.touched && f.date.invalid"><small>Date is required.</small></ion-text>
+
+        <ion-item>
+          <ion-label position="stacked">Image</ion-label>
+          <input type="file" (change)="onFileChange($event)" />
+          <div class="image-name" *ngIf="imageName">{{ imageName }}</div>
+        </ion-item>
+
+        <div class="actions">
+          <ion-button expand="block" type="submit" class="submit">Post Activity Proposal</ion-button>
+        </div>
+
+        <div class="success" *ngIf="submittedMessage">{{ submittedMessage }}</div>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</div>

@@ -1,0 +1,13 @@
+.profile-top { display:flex; align-items:center; gap:16px; padding:12px; }
+.big-avatar { --size:96px; }
+.initials { width:96px; height:96px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(142,76,255,0.12); color: #4a148c; font-size:28px; }
+.counts { display:flex; gap:12px; margin-left:8px; margin-top:6px }
+.count { background:#e9d9ff; padding:8px 12px; border-radius:8px; text-align:center; }
+.count .num { font-weight:700 }
+.profile-body { padding:12px; }
+.bio-box { padding:12px; border:1px solid #eee; border-radius:8px; color: #666 }
+.section { margin-top:14px }
+.chips ion-chip { margin-right:8px; background: rgba(142,76,255,0.12); color:#4a148c }
+.activity-card { background:#fff; padding:12px; border-radius:8px; margin-top:8px; box-shadow:0 2px 6px rgba(0,0,0,0.04) }
+.meta { color:#666; font-size:0.9rem }
+.actions { display:flex; gap:8px; justify-content:flex-end; margin-top:8px }

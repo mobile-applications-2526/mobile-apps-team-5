@@ -1,0 +1,28 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Saved
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Saved</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <app-header name="Saved"></app-header>
+  
+  <div class="saved-list">
+    <ng-container *ngIf="saved?.length; else empty">
+      <ng-container *ngFor="let ev of saved">
+        <app-saved-event [event]="ev"></app-saved-event>
+      </ng-container>
+    </ng-container>
+    <ng-template #empty>
+      <div class="empty-state">No liked events yet</div>
+    </ng-template>
+  </div>
+</ion-content>

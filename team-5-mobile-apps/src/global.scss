@@ -35,3 +35,17 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/*
+ * Hide the per-page Ionic header (title bar) for pages rendered inside tabs
+ * while allowing pages that explicitly opt-in with class="keep-header" to keep theirs
+ * (e.g. the Profile page which has a back button).
+ */
+ion-tabs ion-header:not(.keep-header) {
+	display: none !important;
+}
+
+/* If a page has a condensed header (collapse="condense") make sure it's also hidden */
+ion-tabs ion-header[collapse]:not(.keep-header) {
+	display: none !important;
+}

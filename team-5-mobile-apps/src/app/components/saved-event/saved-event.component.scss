@@ -1,0 +1,38 @@
+.saved-card-component {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+  padding: 6px;
+}
+.saved-card-component .thumb {
+  width: 80px;
+  height: 60px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  flex: 0 0 80px;
+}
+.saved-card-component .info { flex: 1 1 auto; }
+.saved-card-component .row.top { display:flex; align-items:center; justify-content:space-between; }
+.saved-card-component h3 { margin:0; font-size:14px; font-weight:700; color: #111827; line-height:1.1; }
+.saved-card-component .icon-btn { background:transparent; border:none; padding:6px; }
+.saved-card-component .icon-btn ion-icon { color:#10b981; font-size:20px }
+.saved-card-component .meta-row { display:flex; gap:8px; align-items:center; color:#6b7280; margin-top:6px; }
+.saved-card-component .meta-row ion-icon { font-size:14px }
+.saved-card-component .location { margin-top:6px; display:flex; gap:8px; align-items:center; color:#374151 }
+
+.saved-card-component .icons { display:flex; gap:8px; align-items:center; }
+.saved-card-component .icon-btn.star ion-icon { color: #2563eb; }
+.saved-card-component .icon-btn.heart ion-icon { color: #10b981; }
+.saved-card-component .friends { margin-top:8px; display:flex; align-items:center; gap:10px; color:#7c3aed; font-size:13px }
+.saved-card-component .friends ion-icon { font-size:20px }
+
+/* Mobile friendly tweaks */
+@media (max-width: 480px) {
+  .saved-card-component { padding: 6px 8px; gap:8px; }
+  .saved-card-component .thumb { width: 72px; height: 54px; }
+  .saved-card-component h3 { font-size:13px }
+}
