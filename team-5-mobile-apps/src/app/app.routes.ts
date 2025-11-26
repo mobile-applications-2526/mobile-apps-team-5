@@ -1,8 +1,21 @@
 import { Routes } from '@angular/router';
+import { AuthGuardService } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
     loadChildren: () => import('./pages/tabs.routes').then((m) => m.routes),
   },
+  {
+    path: 'login',
+    loadComponent: () => import('./pages/login/login.page').then(m => m.LoginPage),
+  },
+  {
+    path: 'logout',
+    loadComponent: () => import('./pages/logout/logout.page').then(m => m.LogoutPage),
+  },
+  {
+    path: '**',
+    redirectTo: '/tabs/explore',
+  }
 ];
