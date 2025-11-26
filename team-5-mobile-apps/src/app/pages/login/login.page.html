@@ -1,0 +1,25 @@
+<ion-header class="keep-header">
+  <ion-toolbar>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form (ngSubmit)="login()" [formGroup]="form">
+    <ion-item>
+      <ion-label position="stacked">Email</ion-label>
+      <ion-input type="email" formControlName="email" placeholder="you@example.com"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Password</ion-label>
+      <ion-input type="password" formControlName="password" placeholder="••••••"></ion-input>
+    </ion-item>
+
+    <div style="margin-top: 16px; display: flex; gap: 8px;">
+      <ion-button type="submit" [disabled]="loading || form.invalid" expand="block">Login</ion-button>
+      <ion-button color="secondary" (click)="register()" [disabled]="loading || form.invalid" expand="block">Register</ion-button>
+    </div>
+
+    <div *ngIf="error" style="color: var(--ion-color-danger); margin-top: 8px;">{{ error }}</div>
+  </form>
+</ion-content>
