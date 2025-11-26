@@ -1,63 +1,45 @@
-<div class="swipe-container">
-  <div *ngIf="!events.length" class="empty">No events right now</div>
+<div class="stack-container" *ngIf="events.length > 0">
+  
+  <div 
+    class="card"
+    *ngFor="let item of events; let i = index"
+    [ngStyle]="getCardStyle(i)"
+    #topCard
+    (pointerdown)="i === 0 ? onPointerDown($event) : null"
+    (pointermove)="i === 0 ? onPointerMove($event) : null"
+    (pointerup)="i === 0 ? onPointerUp($event) : null"
+    (pointercancel)="i === 0 ? onPointerUp($event) : null">
 
-  <ng-container *ngFor="let ev of events; let i = index">
-    <div
-      class="card"
-      [class.top]="i === 0"
-      [style.zIndex]="events.length - i"
-      *ngIf="i < 4"
-      (pointerdown)="i === 0 ? onPointerDown($event) : null"
-      (pointermove)="i === 0 ? onPointerMove($event) : null"
-      (pointerup)="i === 0 ? onPointerUp($event) : null"
-      [attr.data-index]="i"
-      [attr.aria-hidden]="i !== 0"
-      #topCard
-      [ngStyle]="getCardStyle(i)"
-    >
-      <div class="card-image" [style.backgroundImage]="'url(' + ev.image + ')'">
-        <div class="card-meta">
-          <h2>{{ ev.name }}</h2>
-          <span class="category">{{ ev.category }}</span>
-        </div>
-        <!-- swipe indicators -->
-        <div class="indicator like" [style.opacity]="translateX > 0 ? indicatorOpacity : 0">
-          <ion-icon name="checkmark-circle"></ion-icon>
-        </div>
-        <div class="indicator dislike" [style.opacity]="translateX < 0 ? indicatorOpacity : 0">
-          <ion-icon name="close-circle"></ion-icon>
-        </div>
-      </div>
-      <div class="card-body">
-        <p class="desc">{{ ev.description }}</p>
-        <p class="meta">
-          <span class="participants">{{ ev.minParticipants }} - {{ ev.maxParticipants }} people</span>
-          <span class="dot">•</span>
-          <time class="date">{{ ev.date | date:'mediumDate' }}</time>
-        </p>
-      </div>
-      <!-- controls inside the card for the top card only -->
-      <div class="controls" *ngIf="i === 0">
-        <div class="action-pill">
-          <ion-button fill="clear" class="action-btn dislike" (click)="onDislike()" aria-label="Dislike">
-            <div class="circle">
-              <ion-icon name="close" slot="icon-only"></ion-icon>
-            </div>
-          </ion-button>
-
-          <ion-button fill="clear" class="action-btn save" (click)="onSave()" aria-label="Save">
-            <div class="circle">
-              <ion-icon name="star" slot="icon-only"></ion-icon>
-            </div>
-          </ion-button>
-
-          <ion-button fill="clear" class="action-btn like" (click)="onLike()" aria-label="Like">
-            <div class="circle">
-              <ion-icon name="heart" slot="icon-only"></ion-icon>
-            </div>
-          </ion-button>
-        </div>
-      </div>
+    <div class="card-image" 
+         [style.backgroundImage]="'url(' + (item.image_url || 'https://ionicframework.com/docs/img/demos/card-media.png') + ')'">
     </div>
-  </ng-container>
+
+    <div class="card-content">
+      <h2>{{ item.name }}</h2>
+      <p>{{ item.location }}</p>
+      <p class="desc">{{ item.description }}</p>
+    </div>
+
+    <div class="overlay-nope" [style.opacity]="i === 0 && translateX < 0 ? indicatorOpacity : 0">
+      NOPE
+    </div>
+    <div class="overlay-like" [style.opacity]="i === 0 && translateX > 0 ? indicatorOpacity : 0">
+      LIKE
+    </div>
+
+  </div>
+</div>
+
+<div class="actions" *ngIf="events.length > 0">
+  <ion-button fill="clear" (click)="onDislike()">
+    <ion-icon name="close-circle" color="danger" style="font-size: 64px;"></ion-icon>
+  </ion-button>
+  <ion-button fill="clear" (click)="onLike()">
+    <ion-icon name="checkmark-circle" color="success" style="font-size: 64px;"></ion-icon>
+  </ion-button>
+</div>
+
+<div *ngIf="events.length === 0" class="empty-state">
+  <h3>No more activities!</h3>
+  <p>Check back later.</p>
 </div>

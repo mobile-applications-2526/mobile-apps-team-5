@@ -9,7 +9,8 @@ import { Router } from '@angular/router';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, IonContent, IonHeader, IonTitle, IonToolbar, IonItem, IonInput, IonButton, IonLabel, ReactiveFormsModule],
-  templateUrl: './login.page.html'
+  templateUrl: './login.page.html',
+  // styleUrls: ['./login.page.scss'],
 })
 export class LoginPage {
   form = this.fb.group({
@@ -26,25 +27,36 @@ export class LoginPage {
     this.loading = true; this.error = '';
     const { email, password } = this.form.value as { email: string; password: string };
     const { error } = await this.supabase.signIn(email, password);
-    this.loading = false;
+    
     if (error) {
+      this.loading = false;
       this.error = error.message;
       return;
     }
-    this.router.navigateByUrl('/tabs/explore');
+    const profile = await this.supabase.getProfile();
+    this.loading = false;
+
+    if (profile && profile.full_name) {
+      // Case 1: Profile exists and has a name -> Go to App
+      this.router.navigateByUrl('/tabs/explore');
+    } else {
+      // Case 2: Profile is empty or missing -> Go to Setup
+      this.router.navigateByUrl('/profile-setup');
+    }
   }
 
   async register() {
     if (this.form.invalid) return;
     this.loading = true; this.error = '';
     const { email, password } = this.form.value as { email: string; password: string };
-    const { error } = await this.supabase.signUp(email, password);
+    const { error } = await this.supabase.signUp(email, password) as { error: { message: string } | null };
     this.loading = false;
     if (error) {
       this.error = error.message;
       return;
     }
-    // After sign up, Supabase may require email confirmation
-    this.router.navigateByUrl('/tabs/explore');
+    alert('Registration successful! Please check your email to verify your account.');
+    // After sign up, success -> profile setup page
+    this.form.reset();
   }
 }

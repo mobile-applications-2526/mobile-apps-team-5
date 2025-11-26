@@ -1,31 +1,56 @@
-<ng-container *ngIf="(profile$ | async) as profile">
+<ng-container *ngIf="user">
+  
   <div class="profile-top">
     <ion-avatar class="big-avatar">
-      <div class="initials">{{ getInitials(profile) }}</div>
+      <div class="initials">{{ getInitials() }}</div>
     </ion-avatar>
+    
     <div class="counts">
-      <div class="count"> <div class="num">{{ profile.following }}</div><div class="label">Following</div></div>
-      <div class="count"> <div class="num">{{ profile.followers }}</div><div class="label">Followers</div></div>
+      <div class="count"> 
+        <div class="num">{{ user.following || 0 }}</div>
+        <div class="label">Following</div>
+      </div>
+      <div class="count"> 
+        <div class="num">{{ user.followers || 0 }}</div>
+        <div class="label">Followers</div>
+      </div>
     </div>
   </div>
 
   <div class="profile-body">
-    <h2>{{ profile.name }}</h2>
-    <div class="location">{{ profile.location }}</div>
+    <h2 *ngIf="!edit">{{ user.full_name }}</h2>
+    
+    <div *ngIf="!edit" class="location">{{ user.location || 'Leuven, BE' }}</div>
 
     <div class="section">
       <div class="section-header">
         <span>Self-introduction</span>
-        <ion-button fill="clear" size="small" (click)="toggleEdit()"><ion-icon name="create"></ion-icon></ion-button>
+        <ion-button fill="clear" size="small" (click)="toggleEdit()">
+          <ion-icon [name]="edit ? 'close' : 'create'"></ion-icon>
+        </ion-button>
       </div>
-      <div *ngIf="!edit" class="bio-box">{{ profile.bio || 'Add Bio' }}</div>
+
+      <div *ngIf="!edit" class="bio-box">
+        {{ user.bio || 'Add a bio to introduce yourself...' }}
+      </div>
+
       <form *ngIf="edit" [formGroup]="form">
-        <ion-item>
-          <ion-textarea formControlName="bio"></ion-textarea>
+        
+        <ion-item class="ion-margin-bottom">
+          <ion-label position="stacked">Name</ion-label>
+          <ion-input formControlName="name"></ion-input>
         </ion-item>
-        <div class="actions">
+
+        <ion-item>
+          <ion-label position="stacked">Bio</ion-label>
+          <ion-textarea formControlName="bio" rows="3"></ion-textarea>
+        </ion-item>
+        
+        <div class="actions" style="margin-top: 15px;">
           <ion-button fill="clear" (click)="toggleEdit()">Cancel</ion-button>
-          <ion-button (click)="save()">Save</ion-button>
+          <ion-button (click)="save()" [disabled]="loading">
+            {{ loading ? 'Saving...' : 'Save' }}
+          </ion-button>
         </div>
       </form>
     </div>
@@ -33,31 +58,35 @@
     <div class="section">
       <h3>Interests</h3>
       <div class="chips">
-        <ion-chip *ngFor="let i of profile.interests">{{ i }}</ion-chip>
+        <ion-chip *ngFor="let i of user.interests || []">{{ i }}</ion-chip>
+        <p *ngIf="!user.interests?.length" style="color:gray; font-size: 0.9em;">No interests added.</p>
       </div>
     </div>
 
     <div class="section">
       <h3>Languages</h3>
       <div class="chips">
-        <ion-chip *ngFor="let l of profile.languages">{{ l }}</ion-chip>
+        <ion-chip *ngFor="let l of user.languages || []">{{ l }}</ion-chip>
+        <p *ngIf="!user.languages?.length" style="color:gray; font-size: 0.9em;">No languages added.</p>
       </div>
     </div>
 
     <div class="section">
       <h3>Upcoming activities</h3>
-      <div *ngFor="let a of profile.upcomingActivities" class="activity-card">
-        <h4>{{ a.title }}</h4>
-        <div class="meta">📅 {{ a.date }} • 📍 {{ a.place }}</div>
+      <div *ngFor="let a of user.upcomingActivities || []" class="activity-card">
+        <h4>{{ a.name }}</h4> <div class="meta">📅 {{ a.date }} • 📍 {{ a.location }}</div>
       </div>
+      <p *ngIf="!user.upcomingActivities?.length" style="color:gray; font-size: 0.9em;">No upcoming activities.</p>
     </div>
 
     <div class="section">
       <h3>Past activities</h3>
-      <div *ngFor="let a of profile.pastActivities" class="activity-card">
-        <h4>{{ a.title }}</h4>
-        <div class="meta">📅 {{ a.date }} • 📍 {{ a.place }}</div>
+      <div *ngFor="let a of user.pastActivities || []" class="activity-card">
+        <h4>{{ a.name }}</h4>
+        <div class="meta">📅 {{ a.date }} • 📍 {{ a.location }}</div>
       </div>
+      <p *ngIf="!user.pastActivities?.length" style="color:gray; font-size: 0.9em;">No past activities.</p>
     </div>
+
   </div>
 </ng-container>

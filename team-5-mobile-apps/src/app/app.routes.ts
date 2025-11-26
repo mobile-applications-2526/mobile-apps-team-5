@@ -15,7 +15,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/logout/logout.page').then(m => m.LogoutPage),
   },
   {
+    path: 'profile-setup',
+    loadComponent: () => import('./pages/profile-setup/profile-setup.page').then( m => m.ProfileSetupPage)
+  },
+  {
     path: '**',
     redirectTo: '/tabs/explore',
-  }
+  },
+ 
 ];

@@ -13,8 +13,11 @@
     </ion-toolbar>
   </ion-header>
   <app-header name="Explore"></app-header>
+  
+    <app-event-swipe 
+    *ngIf="!loading"
+    [events]="activities" 
+    (swiped)="handleSwipe($event)">
+  </app-event-swipe>
 
-  <div class="page-body">
-    <app-event-swipe></app-event-swipe>
-  </div>
 </ion-content>

@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import { profileStore, Profile } from '../../store/profile.store';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-profile',
@@ -11,38 +11,87 @@ import { profileStore, Profile } from '../../store/profile.store';
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
 })
-export class ProfileComponent {
-  profile$ = profileStore.profile$;
-  edit = false;
-  form = this.fb.group({ name: [''], location: [''], bio: [''] });
+export class ProfileComponent implements OnChanges {
+  
+  // 1. Receive data from the Parent Page
+  @Input() user: any = null;
 
-  constructor(private fb: FormBuilder) {
-    this.profile$.subscribe((p) => this.form.patchValue({ name: p.name, location: p.location, bio: p.bio }));
+  edit = false;
+  loading = false;
+
+  // 2. Setup Form (Note: DB uses 'full_name', but we can keep 'name' in form if we map it)
+  form = this.fb.group({
+    name: ['', Validators.required],
+    location: [''], // NOTE: Ensure your DB 'profiles' table has a 'location' column if you want to save this!
+    bio: ['']
+  });
+
+  constructor(
+    private fb: FormBuilder,
+    private supabase: SupabaseService
+  ) {}
+
+  // 3. Listen for changes: When Supabase data arrives, fill the form
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['user'] && this.user) {
+      this.form.patchValue({
+        name: this.user.full_name || '', // Map DB 'full_name' to Form 'name'
+        // location: this.user.location || '', // Uncomment if you added location to DB
+        bio: this.user.bio || ''
+      });
+    }
   }
 
   toggleEdit() {
     this.edit = !this.edit;
-  }
-
-  save() {
-    if (this.form.valid) {
-      // sanitize nulls coming from the form and only pass string|undefined values
-      const fv = this.form.value as { name?: string | null; location?: string | null; bio?: string | null };
-      const patch: Partial<Profile> = {
-        ...(fv.name != null ? { name: fv.name } : {}),
-        ...(fv.location != null ? { location: fv.location } : {}),
-        ...(fv.bio != null ? { bio: fv.bio } : {}),
-      };
-      profileStore.update(patch);
-      this.edit = false;
+    // Reset form to current user data if cancelling
+    if (!this.edit && this.user) {
+      this.form.patchValue({
+        name: this.user.full_name,
+        bio: this.user.bio
+      });
     }
   }
 
-  // compute initials safely in TypeScript so the template stays within Angular's expression limits
-  getInitials(profile: Profile | null | undefined) {
-    const name = profile?.name || '';
+  async save() {
+    if (!this.form.valid) return;
+    this.loading = true;
+
+    try {
+      const fv = this.form.value;
+
+      // 4. Send updates to Supabase
+      await this.supabase.updateProfileData({
+        full_name: fv.name || '',      // Map Form 'name' back to DB 'full_name'
+        bio: fv.bio || '',
+        // location: fv.location || '' // Uncomment if added to DB
+      });
+
+      // 5. Update local view immediately so user sees change without refresh
+      this.user = { 
+        ...this.user, 
+        full_name: fv.name, 
+        bio: fv.bio 
+      };
+      
+      this.edit = false;
+
+    } catch (error) {
+      console.error('Update failed', error);
+      alert('Could not save profile.');
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  // Helper to get initials from the Real Data
+  getInitials() {
+    const name = this.user?.full_name || ''; // Use full_name from DB
     const parts = name.trim().split(/\s+/).filter(Boolean);
-    const letters = parts.map((s) => (s && s.length ? s[0] : '')).join('');
+    if (parts.length === 0) return '?';
+    
+    // Get first letter of first name + first letter of last name
+    const letters = parts.map((s: string) => s[0]).join('');
     return letters.slice(0, 2).toUpperCase();
   }
 }

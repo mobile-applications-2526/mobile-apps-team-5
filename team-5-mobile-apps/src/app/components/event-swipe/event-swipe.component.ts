@@ -1,10 +1,6 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, ViewChild, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { EventStore } from '../../store/event.store';
-import { SavedStore } from '../../store/saved.store';
-import { EventModel } from '../../models/event.model';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-event-swipe',
@@ -13,11 +9,15 @@ import { Subscription } from 'rxjs';
   templateUrl: './event-swipe.component.html',
   styleUrls: ['./event-swipe.component.scss'],
 })
-export class EventSwipeComponent implements OnInit, OnDestroy {
-  events: EventModel[] = [];
-  sub?: Subscription;
+export class EventSwipeComponent implements OnInit {
+  
+  
+  @Input() events: any[] = []; 
 
-  // drag state
+  
+  @Output() swiped = new EventEmitter<{ id: string; liked: boolean }>();
+
+  
   dragging = false;
   startX = 0;
   startY = 0;
@@ -27,15 +27,10 @@ export class EventSwipeComponent implements OnInit, OnDestroy {
 
   @ViewChild('topCard', { static: false }) topCard?: ElementRef<HTMLElement>;
 
-  constructor(public store: EventStore, public saved: SavedStore) {}
+  constructor() {}
 
-  ngOnInit() {
-    this.sub = this.store.events$.subscribe((list) => (this.events = list));
-  }
+  ngOnInit() {}
 
-  ngOnDestroy() {
-    this.sub?.unsubscribe();
-  }
 
   onPointerDown(ev: PointerEvent) {
     if (!this.events.length) return;
@@ -57,42 +52,45 @@ export class EventSwipeComponent implements OnInit, OnDestroy {
     if (!this.dragging) return;
     this.dragging = false;
     const threshold = 120;
+    
+    // Check ID of the top card
     const id = this.topEvent?.id;
     if (!id) return this.resetTransform();
+
     if (this.translateX > threshold) {
-      this.animateOut(1);
-      this.store.like(id);
+      // Swipe RIGHT (Like)
+      this.finishSwipe(id, true);
     } else if (this.translateX < -threshold) {
-      this.animateOut(-1);
-      this.store.dislike(id);
+      // Swipe LEFT (Dislike)
+      this.finishSwipe(id, false);
     } else {
       this.resetTransform();
     }
   }
 
-  get topEvent(): EventModel | undefined {
+  // --- HELPERS ---
+
+  get topEvent(): any | undefined {
     return this.events && this.events.length ? this.events[0] : undefined;
   }
 
-  // Return inline styles for a card at index i to create stack/deck effect.
   getCardStyle(i: number) {
     const offset = Math.min(i, 3);
     if (i === 0) {
-      // top card — use dynamic transform from dragging
       return {
         transform: `translate(${this.translateX}px, ${this.translateY}px) rotate(${this.rotation}deg)`,
         transition: this.dragging ? 'none' : 'transform 200ms ease',
+        zIndex: 100
       } as any;
     }
-    // behind cards — slightly scaled and shifted down
     const scale = 1 - offset * 0.03;
-    const translateY = offset * 12; // px
+    const translateY = offset * 12; 
     return {
       transform: `translateY(${translateY}px) scale(${scale})`,
+      zIndex: 100 - i
     } as any;
   }
 
-  // indicator opacity (0..1) based on translateX
   get indicatorOpacity() {
     const thr = 120;
     return Math.min(Math.abs(this.translateX) / thr, 1);
@@ -122,37 +120,29 @@ export class EventSwipeComponent implements OnInit, OnDestroy {
     const offX = direction * (window.innerWidth + 200);
     const offY = this.translateY;
     el.style.transform = `translate(${offX}px, ${offY}px) rotate(${direction * 30}deg)`;
-    // small timeout; store already removed event so next will render
-    setTimeout(() => {
-      this.translateX = 0;
-      this.translateY = 0;
-      this.rotation = 0;
-    }, 320);
   }
 
+  // --- ACTIONS ---
+
   onLike() {
-    const id = this.topEvent?.id;
-    if (!id) return;
-    this.animateOut(1);
-    this.store.like(id);
+    if (this.topEvent) this.finishSwipe(this.topEvent.id, true);
   }
 
   onDislike() {
-    const id = this.topEvent?.id;
-    if (!id) return;
-    this.animateOut(-1);
-    this.store.dislike(id);
+    if (this.topEvent) this.finishSwipe(this.topEvent.id, false);
   }
 
-  // optional middle action (e.g. save / super-like)
-  onSave() {
-    const id = this.topEvent?.id;
-    if (!id) return;
-    // add to saved list and remove from swipe queue
-    const ev = this.topEvent;
-    if (!ev) return;
-    this.animateOut(1);
-    this.saved.add(ev);
-    this.store.remove(ev.id);
+  private finishSwipe(id: string, liked: boolean) {
+    const direction = liked ? 1 : -1;
+    this.animateOut(direction);
+
+   
+    this.swiped.emit({ id, liked });
+
+    
+    setTimeout(() => {
+        this.events.shift(); 
+        this.resetTransform(); 
+    }, 200);
   }
 }

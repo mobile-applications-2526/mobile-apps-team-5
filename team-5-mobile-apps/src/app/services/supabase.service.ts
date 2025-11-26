@@ -64,18 +64,160 @@ export class SupabaseService {
   signIn(email: string, password: string) {
     return this._client.auth.signInWithPassword({ email, password });
   }
-  signUp(email: string, password: string) {
-    return this._client.auth.signUp({ email, password });
+
+  // signUp(email: string, password: string) {
+  //   return this._client.auth.signUp({ email, password });
+  // }
+
+  // UPDATED: Creates the Auth user AND the initial Database Profile
+  async signUp(email: string, password: string) {
+    const response = await this._client.auth.signUp({ email, password });
+    if (response.error) throw response.error;
+
+    // Try to create initial profile, but don't fail if it doesn't work (we fix it in Setup)
+    if (response.data.user) {
+      const tempUsername = email.split('@')[0] + Math.floor(Math.random() * 1000);
+      await this._client.from('profiles').insert({
+          id: response.data.user.id,
+          username: tempUsername, 
+          full_name: '', 
+          bio: ''
+        });
+    }
+    return response;
   }
+
+
   signOut() {
     return this._client.auth.signOut();
   }
 
-  // Data helpers
+  
+
+  //-------helper get current logged-in user
+  async getCurrentUser(){
+    const {data} = await this._client.auth.getUser();
+    return data.user;
+  }
+
+  // Helper to check if profile exists and is complete
+  async getProfile() {
+    const user = await this.getCurrentUser();
+    if (!user) return null;
+
+    const { data, error } = await this._client
+      .from('profiles')
+      .select('*') 
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching profile:', error);
+      return null;
+    }
+    return data;
+  }
+
+  //to confirm the profile details
+  async completeProfile(firstName: string, lastName: string, bio: string) {
+    const user = await this.getCurrentUser();
+    
+    if (!user) {
+      throw new Error('User not logged in');
+    }
+
+    // Combine inputs because your DB uses 'full_name'
+    const fullName = `${firstName} ${lastName}`.trim();
+    const randomUsername = firstName.toLowerCase().replace(/\s/g, '') + Math.floor(Math.random() * 10000);
+    const { error } = await this._client
+      .from('profiles')
+      .upsert({
+        id: user.id, // This links it to the user
+        full_name: fullName,
+        bio: bio,
+        username: randomUsername
+      }, { onConflict: 'id' }); // If ID exists, update it. If not, insert.
+
+    if (error) throw error; }
+
+  
+    // Update existing profile
+    async updateProfileData(profileData: { full_name?: string; bio?: string; location?: string }) {
+      const user = await this.getCurrentUser();
+      if (!user) throw new Error('Not logged in');
+  
+      const { error } = await this._client
+        .from('profiles')
+        .update(profileData)
+        .eq('id', user.id);
+  
+      if (error) throw error;
+    }
+
+    async getActivities() {
+      
+      const user = await this.getCurrentUser();
+    if (!user) return [];
+
+    const { data: mySwipes, error: swipeError } = await this._client
+      .from('activity_swipes')
+      .select('swipe') // This column holds the Activity ID
+      .eq('user_id', user.id);
+
+    if (swipeError) {
+      console.error('Error fetching history:', swipeError);
+      return [];
+    }
+
+    const swipedIds = mySwipes.map((row: any) => row.swipe);
+
+   
+    let query = this._client
+      .from('activities')
+      .select('id, name, description, location, activity_date, min_participants, max_participants')
+      .eq('status', 'active');
+
+    
+    if (swipedIds.length > 0) {
+      query = query.not('id', 'in', `(${swipedIds.join(',')})`);
+    }
+
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error loading cards:', error);
+      return [];
+    }
+    return data || [];
+  }
+
+  async recordSwipe(activityId: string, liked: boolean) {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('Not logged in');
+
+    //Insert the swipe with the User ID
+    const { error } = await this._client
+      .from('activity_swipes')
+      .insert({
+        user_id: user.id,     
+        swipe: activityId,   
+        liked: liked
+      });
+
+    if (error) {
+      if (error.code !== '23505') {
+        console.error('Swipe error:', error);
+        throw error;
+      }
+    }
+  }
+  
+      // Data helpers
   from(table: string) {
     return this._client.from(table);
   }
   rpc(fn: string, args?: Record<string, unknown>) {
     return this._client.rpc(fn, args);
   }
+ 
 }
