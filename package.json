@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@capacitor/preferences": "^7.0.2",
+    "@supabase/supabase-js": "^2.84.0"
+  }
+}
