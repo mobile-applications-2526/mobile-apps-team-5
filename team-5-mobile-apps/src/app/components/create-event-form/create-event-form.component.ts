@@ -30,7 +30,7 @@ function minLessOrEqualMax(group: AbstractControl): ValidationErrors | null {
     ReactiveFormsModule,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent,
     IonItem, IonLabel, IonInput, IonText, IonSelect, IonSelectOption,
-    IonTextarea, IonGrid, IonRow, IonCol, IonButton, IonSpinner,
+    IonTextarea, IonButton, IonSpinner,
     IonDatetime, IonDatetimeButton, IonModal
   ]
 })
