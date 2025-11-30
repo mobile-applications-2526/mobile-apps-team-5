@@ -154,6 +154,49 @@ export class SupabaseService {
       if (error) throw error;
     }
 
+
+    async getAllInterests() {
+      const { data, error } = await this._client
+        .from('interests')
+        .select('id, name')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching interests:', error);
+        return [];
+      }
+      return data || [];
+    }
+
+    async createActivity(formValues: any){
+      const user = await this.getCurrentUser();
+      if (!user) throw new Error('You must be logged in to create an activity');
+      
+
+      const newActivity = {
+        name: formValues.title,            
+        description: formValues.description,
+        location: formValues.location,
+        activity_date: formValues.date,    
+        min_participants: formValues.min_participants || 2,
+        max_participants: formValues.max_participants || 10,
+        status: 'active',                  
+        creator_id: user.id,               
+        interest: formValues.category         
+      };
+
+      const { error } = await this._client
+      .from('activities')
+      .insert(newActivity);
+  
+      if (error) {
+        console.error('Supabase Create Error:', error);
+        throw error;
+      }
+     
+    }
+    
+
     async getActivities() {
       
       const user = await this.getCurrentUser();

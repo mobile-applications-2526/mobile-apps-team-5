@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/angular/standalone';
 import { HeaderComponent } from '../../components/Header/header.componet';
 import { CreateEventFormComponent } from '../../components/create-event-form/create-event-form.component';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-create',
