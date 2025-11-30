@@ -1,0 +1,45 @@
+<ion-header class="ion-no-border">
+    <ion-toolbar>
+      <ion-title>Profile Setup</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+  
+    <div style="text-align: center; margin-top: 20px; margin-bottom: 30px;">
+      <h2>Confirm your details</h2>
+      <p style="color: gray;">Let's complete your profile so others can find you!</p>
+    </div>
+  
+    <ion-item class="ion-margin-bottom">
+      <ion-label position="stacked">First Name</ion-label>
+      <ion-input [(ngModel)]="firstName" placeholder="e.g. Marie"></ion-input>
+    </ion-item>
+  
+    <ion-item class="ion-margin-bottom">
+      <ion-label position="stacked">Surname</ion-label>
+      <ion-input [(ngModel)]="lastName" placeholder="e.g. Curie"></ion-input>
+    </ion-item>
+  
+    <ion-item class="ion-margin-bottom">
+      <ion-label position="stacked">Bio / Message</ion-label>
+      <ion-textarea 
+        [(ngModel)]="bio" 
+        rows="4" 
+        placeholder="Tell us a little about yourself...">
+      </ion-textarea>
+    </ion-item>
+  
+    <ion-button 
+      expand="block" 
+      color="primary" 
+      class="ion-margin-top" 
+      (click)="onComplete()" 
+      [disabled]="loading">
+      
+      <span *ngIf="!loading">Complete Setup</span>
+      <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+      
+    </ion-button>
+  
+  </ion-content>

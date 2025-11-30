@@ -10,5 +10,11 @@
 </ion-header>
 
 <ion-content>
-  <app-profile></app-profile>
+  <div *ngIf="loading" style="text-align: center; margin-top: 50%;">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+  <app-profile 
+    *ngIf="!loading && profile" 
+    [user]="profile">
+  </app-profile>
 </ion-content>

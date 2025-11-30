@@ -1,7 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { SupabaseService } from '../../services/supabase.service';
+import { Router } from '@angular/router'; 
+
+
+import { 
+  IonCard, IonCardHeader, IonCardTitle, IonCardContent,
+  IonItem, IonLabel, IonInput, IonText, IonSelect, IonSelectOption,
+  IonTextarea, IonGrid, IonRow, IonCol, IonButton, IonSpinner,
+  IonDatetime, IonDatetimeButton, IonModal
+} from '@ionic/angular/standalone';
 
 function minLessOrEqualMax(group: AbstractControl): ValidationErrors | null {
   const min = group.get('minParticipants')?.value;
@@ -13,66 +22,91 @@ function minLessOrEqualMax(group: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-create-event-form',
   standalone: true,
-  imports: [CommonModule, IonicModule, ReactiveFormsModule],
   templateUrl: './create-event-form.component.html',
   styleUrls: ['./create-event-form.component.scss'],
+ 
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule,
+    IonCard, IonCardHeader, IonCardTitle, IonCardContent,
+    IonItem, IonLabel, IonInput, IonText, IonSelect, IonSelectOption,
+    IonTextarea, IonGrid, IonRow, IonCol, IonButton, IonSpinner,
+    IonDatetime, IonDatetimeButton, IonModal
+  ]
 })
-export class CreateEventFormComponent {
+export class CreateEventFormComponent implements OnInit {
+  
   form = this.fb.group(
     {
       name: ['', [Validators.required, Validators.minLength(3)]],
       category: ['', Validators.required],
       description: ['', [Validators.required, Validators.minLength(10)]],
-      minParticipants: [null, [Validators.required, Validators.min(1)]],
-      maxParticipants: [null, [Validators.required, Validators.min(1)]],
+      minParticipants: [2, [Validators.required, Validators.min(1)]],
+      maxParticipants: [10, [Validators.required, Validators.min(1)]],
       date: ['', Validators.required],
-  image: [null as any],
+      location: ['', Validators.required],
+      // image: [null] 
     },
     { validators: [minLessOrEqualMax] }
   );
 
-  submittedMessage = '';
-  imageName: string | null = null;
+  loading = false;
+  categories: any[] = [];
 
-  categories = [
-    { val: 'sports', label: 'Sports' },
-    { val: 'culture', label: 'Culture' },
-    { val: 'entertainment', label: 'Entertainment' },
-    { val: 'party', label: 'Party' },
-    { val: 'other', label: 'Other' },
-  ];
+  constructor(
+    private fb: FormBuilder,
+    private supabase: SupabaseService,
+    private router: Router 
+  ) {}
 
-  constructor(private fb: FormBuilder) {}
-
-  get f() {
-    return this.form.controls;
+  async ngOnInit() {
+    this.categories = await this.supabase.getAllInterests();
+    
+    
+    const now = new Date().toISOString();
+    this.form.patchValue({ date: now });
   }
 
-  onFileChange(ev: Event) {
-    const input = ev.target as HTMLInputElement;
-    if (!input.files || !input.files.length) {
-      this.imageName = null;
-      this.form.patchValue({ image: null });
-      return;
-    }
-    const file = input.files[0];
-    this.imageName = file.name;
-    this.form.patchValue({ image: file });
+  
+  onDateChange(event: any) {
+    const selectedDate = event.detail.value;
+    this.form.patchValue({ date: selectedDate });
   }
 
-  submit() {
-    this.submittedMessage = '';
+  async submit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-    // simulated submission
-    this.submittedMessage = 'Event created';
-    // keep message visible briefly and reset form fields (except maybe image)
-    setTimeout(() => {
-      this.submittedMessage = '';
-    }, 3000);
-    this.form.reset();
-    this.imageName = null;
+
+    this.loading = true;
+    try {
+      const formVal = this.form.value;
+      const activityData = {
+        title: formVal.name,
+        description: formVal.description,
+        location: formVal.location,
+        date: formVal.date,
+        category: formVal.category,
+        min_participants: formVal.minParticipants,
+        max_participants: formVal.maxParticipants
+      };
+
+      await this.supabase.createActivity(activityData);
+
+      alert('Event created successfully!');
+      this.form.reset();
+      
+      
+      this.router.navigate(['/tabs/explore']);
+
+    } catch (error: any) {
+      alert('Error creating event: ' + error.message);
+    } finally {
+      this.loading = false;
+    }
   }
+
+
+  get f() { return this.form.controls; }
 }
