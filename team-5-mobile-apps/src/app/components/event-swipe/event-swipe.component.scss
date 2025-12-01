@@ -1,166 +1,181 @@
+/* --- CONTAINER --- */
 .swipe-container {
   position: relative;
   width: 100%;
-  height: 76vh;
+  height: 68vh; /* Adjusted height */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 0;
+  padding: 10px 0;
+  margin-top: 10px;
 }
 
-.empty {
+.empty-state {
+  text-align: center;
+  margin-top: 50%;
   color: var(--ion-color-medium);
 }
 
+/* --- CARD --- */
 .card {
   position: absolute;
   width: 90%;
   max-width: 420px;
-  height: 72vh;
-  background: #fff;
+  height: 100%;
+  background: #fff; /* Force White Background */
   border-radius: 20px;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
   overflow: hidden;
-  transition: transform 200ms ease, box-shadow 200ms ease;
   display: flex;
   flex-direction: column;
+  touch-action: none; /* Crucial for dragging */
+  user-select: none;
 }
 
-.card:not(.top) {
-  opacity: 0.98;
-}
-
+/* --- IMAGE SECTION --- */
 .card-image {
+  width: 100%;
+  height: 45%; /* Image takes top 45% */
   background-size: cover;
   background-position: center;
-  height: 52%;
   position: relative;
+  background-color: #f0f0f0;
 }
 
 .card-image::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.45) 70%);
+  background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%);
   pointer-events: none;
 }
 
-.card-meta {
+.image-tags {
   position: absolute;
-  top: 14px;
-  left: 16px;
-  color: #fff;
-  z-index: 10;
-}
-.card-meta h2 {
-  margin: 0 0 4px 0;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.05;
-  text-shadow: 0 4px 14px rgba(0,0,0,0.5);
-}
-.card-meta .category {
-  display: block;
-  font-size: 14px;
-  opacity: 0.95;
-  text-transform: lowercase;
-  text-shadow: 0 3px 10px rgba(0,0,0,0.45);
-}
-
-.indicator {
-  position: absolute;
-  top: 16px;
-  font-size: 56px;
-  color: #fff;
-  text-shadow: 0 6px 18px rgba(0,0,0,0.6);
-  opacity: 0;
-  transition: opacity 120ms ease;
-  z-index: 12;
-}
-.indicator.like { right: 16px; color: #10b981; }
-.indicator.dislike { left: 16px; color: #ef4444; }
-
-.card-body {
-  background: #fff;
-  padding: 18px;
-  height: calc(48% - 18px);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 10px;
-
-  color: #000000;
-
-  
-}
-.card-body .desc {
-  margin: 0;
-  color: #111827;
-  font-size: 15px;
-  line-height: 1.4;
-  max-height: 3.2em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.card-body .meta {
-  margin: 0;
-  color: #6b7280;
-  font-size: 13px;
+  bottom: 15px;
+  right: 15px;
   display: flex;
   gap: 8px;
-  align-items: center;
+  z-index: 10;
 }
 
-.controls {
-  position: absolute;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  pointer-events: none;
+.tag {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  background: white; /* Default background */
+  
+  &.blue { background-color: #a5b4fc; }
+  &.yellow { background-color: #fde047; }
 }
-.action-pill {
-  pointer-events: auto;
+
+/* --- CONTENT SECTION --- */
+.card-content {
   background: #fff;
-  border-radius: 999px;
-  padding: 8px 14px;
+  padding: 20px;
+  flex: 1; /* Fills remaining space */
   display: flex;
-  gap: 14px;
+  flex-direction: column;
+  gap: 12px;
+
+  /* CRITICAL: FORCE BLACK TEXT */
+  color: #000000 !important;
+
+  h2, p, span, div, strong { 
+    color: #000000 !important; 
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .description {
+    font-size: 15px;
+    color: #333 !important;
+    line-height: 1.4;
+    display: -webkit-box;
+  
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+  }
+
+  .details {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .detail-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    
+    .icon { font-size: 18px; }
+    .text { color: #444 !important; }
+  }
+}
+
+/* --- ACTION BUTTONS (Bottom Row) --- */
+.actions {
+  display: flex;
+  justify-content: center;
   align-items: center;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  gap: 30px;
+  margin-top: 20px;
+  padding-bottom: 20px;
 }
-.action-btn {
-  --padding-start: 0;
-  --padding-end: 0;
-  background: transparent !important;
+
+.circle-btn {
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  padding: 0;
-}
-.action-btn .circle {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: inline-flex;
+  background: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  font-size: 32px;
+  transition: transform 0.1s ease;
+  cursor: pointer;
+
+  &:active { transform: scale(0.9); }
+
+  &.dislike { 
+    color: #ef4444; 
+    border: 1px solid #fee2e2; 
+  }
+  
+  &.like { 
+    color: #22c55e; 
+    border: 1px solid #dcfce7; 
+  }
 }
-.action-btn.dislike .circle { background: #ef4444; }
-.action-btn.save .circle { background: #3b82f6; }
-.action-btn.like .circle { background: #10b981; }
-.action-btn ion-icon { color: #fff; font-size: 26px; }
 
-.card:not(.top) { border-radius: 18px; }
-.card:nth-child(2) { transform: translateY(10px) scale(0.98); }
-.card:nth-child(3) { transform: translateY(20px) scale(0.96); }
-.card:nth-child(4) { transform: translateY(30px) scale(0.94); }
+/* --- OVERLAYS --- */
+.overlay-nope, .overlay-like {
+  position: absolute;
+  top: 40px;
+  padding: 10px 20px;
+  border: 4px solid;
+  border-radius: 8px;
+  font-size: 32px;
+  font-weight: 800;
+  opacity: 0;
+  z-index: 999;
+}
+.overlay-nope { right: 40px; color: #ef4444; border-color: #ef4444; transform: rotate(15deg); }
+.overlay-like { left: 40px; color: #22c55e; border-color: #22c55e; transform: rotate(-15deg); }
 
-@media (max-width: 420px) {
-  .card-meta h2 { font-size: 20px; }
-  .action-btn .circle { width: 48px; height: 48px; }
-  .card { height: 68vh; }
+/* --- RESPONSIVE --- */
+@media (max-width: 380px) {
+  .card-content h2 { font-size: 20px; }
+  .circle-btn { width: 56px; height: 56px; }
 }

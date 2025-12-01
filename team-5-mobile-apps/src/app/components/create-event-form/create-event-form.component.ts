@@ -45,7 +45,7 @@ export class CreateEventFormComponent implements OnInit {
       maxParticipants: [10, [Validators.required, Validators.min(1)]],
       date: ['', Validators.required],
       location: ['', Validators.required],
-      // image: [null] 
+      image: [null as File | null] 
     },
     { validators: [minLessOrEqualMax] }
   );
@@ -73,6 +73,17 @@ export class CreateEventFormComponent implements OnInit {
     this.form.patchValue({ date: selectedDate });
   }
 
+  onFileChange(ev: Event) {
+    const input = ev.target as HTMLInputElement;
+    if (!input.files || !input.files.length) {
+      this.form.patchValue({ image: null });
+      return;
+    }
+    const file = input.files[0];
+   
+    this.form.patchValue({ image: file });
+  }
+
   async submit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -89,7 +100,8 @@ export class CreateEventFormComponent implements OnInit {
         date: formVal.date,
         category: formVal.category,
         min_participants: formVal.minParticipants,
-        max_participants: formVal.maxParticipants
+        max_participants: formVal.maxParticipants,
+        image: this.form.value.image
       };
 
       await this.supabase.createActivity(activityData);

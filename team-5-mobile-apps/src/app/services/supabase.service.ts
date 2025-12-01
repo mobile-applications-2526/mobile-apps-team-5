@@ -168,11 +168,40 @@ export class SupabaseService {
       return data || [];
     }
 
+    async uploadActivityImage(file: File): Promise<string> {
+      if (!file) return ''; 
+  
+      const filePath = `public/${Date.now()}-${file.name}`;
+      const bucket = 'activity_images'; //bucket name in storage is the same 
+  
+      // Upload the file
+      const { error: uploadError } = await this._client.storage
+        .from(bucket)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+  
+      if (uploadError) {
+        console.error('Storage Upload Error:', uploadError);
+        throw new Error('Image upload failed: ' + uploadError.message);
+      }
+  
+      // Get the public URL to save to the database
+      const { data } = this._client.storage.from(bucket).getPublicUrl(filePath);
+      
+      return data.publicUrl;
+  }
+
     async createActivity(formValues: any){
       const user = await this.getCurrentUser();
       if (!user) throw new Error('You must be logged in to create an activity');
       
+      let imageUrl = '';
 
+      if (formValues.image instanceof File) { // is image a fileObject?
+        imageUrl = await this.uploadActivityImage(formValues.image);
+      }
       const newActivity = {
         name: formValues.title,            
         description: formValues.description,
@@ -182,7 +211,8 @@ export class SupabaseService {
         max_participants: formValues.max_participants || 10,
         status: 'active',                  
         creator_id: user.id,               
-        interest: formValues.category         
+        interest: formValues.category,
+        image_url: imageUrl   
       };
 
       const { error } = await this._client
@@ -217,7 +247,7 @@ export class SupabaseService {
    
     let query = this._client
       .from('activities')
-      .select('id, name, description, location, activity_date, min_participants, max_participants')
+      .select('id, name, description, location, activity_date, min_participants, max_participants, image_url, interest (name)')
       .eq('status', 'active');
 
     
