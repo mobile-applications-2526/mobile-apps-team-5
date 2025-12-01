@@ -1,4 +1,4 @@
-<div class="stack-container" *ngIf="events.length > 0">
+<div class="swipe-container" *ngIf="events.length > 0">
   
   <div 
     class="card"
@@ -14,12 +14,26 @@
          [style.backgroundImage]="'url(' + (item.image_url || 'https://ionicframework.com/docs/img/demos/card-media.png') + ')'">
     </div>
 
+    
+
     <div class="card-content">
       <h2>{{ item.name }}</h2>
-      <p>{{ item.location }}</p>
-      <p class="desc">{{ item.description }}</p>
-    </div>
 
+      <p class="description">
+        {{ item.description || 'Join us for an amazing time!' }}
+      </p>
+      <p class="description">
+        <strong>When:</strong> {{ item.activity_date | date: 'medium' }}
+      </p>
+      <p class="description">
+        <strong>Where:</strong> {{ item.location}}
+      </p>
+
+      <div class="image-tags">
+        <span class="tag blue">{{item.interest?.name}}</span>
+      </div>
+    </div>
+  
     <div class="overlay-nope" [style.opacity]="i === 0 && translateX < 0 ? indicatorOpacity : 0">
       NOPE
     </div>
@@ -31,12 +45,13 @@
 </div>
 
 <div class="actions" *ngIf="events.length > 0">
-  <ion-button fill="clear" (click)="onDislike()">
-    <ion-icon name="close-circle" color="danger" style="font-size: 64px;"></ion-icon>
-  </ion-button>
-  <ion-button fill="clear" (click)="onLike()">
-    <ion-icon name="checkmark-circle" color="success" style="font-size: 64px;"></ion-icon>
-  </ion-button>
+  <button class="circle-btn dislike" (click)="onDislike()">
+    <ion-icon name="close"></ion-icon>
+  </button>
+
+  <button class="circle-btn like" (click)="onLike()">
+    <ion-icon name="heart"></ion-icon>
+  </button>
 </div>
 
 <div *ngIf="events.length === 0" class="empty-state">

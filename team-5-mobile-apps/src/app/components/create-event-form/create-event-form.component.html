@@ -83,6 +83,11 @@
           <small>Date is required.</small>
         </ion-text>
 
+        <ion-item class="ion-margin-bottom">
+          <ion-label position="stacked">Image (Optional)</ion-label>
+          <input type="file" accept="image/*" (change)="onFileChange($event)" />
+        </ion-item>
+
         <div class="actions" style="margin-top: 20px;">
           <ion-button expand="block" type="submit" class="submit" [disabled]="loading">
             <span *ngIf="!loading">Post Activity Proposal</span>
