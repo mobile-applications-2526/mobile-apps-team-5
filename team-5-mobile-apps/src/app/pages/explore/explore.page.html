@@ -1,10 +1,10 @@
-<ion-header [translucent]="true">
+<!-- <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
       Explore
     </ion-title>
   </ion-toolbar>
-</ion-header>
+</ion-header> -->
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
@@ -13,10 +13,10 @@
     </ion-toolbar>
   </ion-header>
   <app-header name="Explore"></app-header>
-  
-    <app-event-swipe 
+
+    <app-event-swipe
     *ngIf="!loading"
-    [events]="activities" 
+    [events]="activities"
     (swiped)="handleSwipe($event)">
   </app-event-swipe>
 

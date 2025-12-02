@@ -4,9 +4,12 @@
   justify-content: space-between;
   padding: 8px 12px;
   background: transparent;
+  padding-top: 35px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.left, .right { width: 44px; display:flex; align-items:center; }
+.left{ display:flex; align-items:center; justify-content: center; } 
+.right { width: 44px; display:flex; align-items:center; }
 
 .center { flex: 1; text-align: center; display:flex; align-items:center; justify-content:center; gap:8px }
 
