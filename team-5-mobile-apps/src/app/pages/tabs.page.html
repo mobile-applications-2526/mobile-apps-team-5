@@ -1,4 +1,4 @@
-<ion-tabs>
+<ion-tabs >
   <ion-tab-bar slot="bottom" class="navbar">
     <ion-tab-button tab="explore" href="/tabs/explore">
       <ion-icon aria-hidden="true" name="compass"></ion-icon>
@@ -6,14 +6,10 @@
     </ion-tab-button>
 
     <ion-tab-button tab="saved" href="/tabs/saved">
-      <ion-icon aria-hidden="true" name="bookmark"></ion-icon>
+      <ion-icon aria-hidden="true" name="bookmark" ></ion-icon>
       <ion-label>Saved</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="create" href="/tabs/create">
-      <ion-icon aria-hidden="true" name="add-circle"></ion-icon>
-      <ion-label>Create</ion-label>
-    </ion-tab-button>
 
     <ion-tab-button tab="updates" href="/tabs/updates">
       <ion-icon aria-hidden="true" name="notifications"></ion-icon>
@@ -26,3 +22,10 @@
     </ion-tab-button>
   </ion-tab-bar>
 </ion-tabs>
+
+
+<ion-fab vertical="bottom" horizontal="center" slot="fixed" edge="false" >
+  <ion-fab-button tab="create" href="/tabs/create" class="create-button">
+      <ion-icon name="add-outline" aria-hidden="true" size="large" class="create-icon"></ion-icon>
+  </ion-fab-button>
+</ion-fab>

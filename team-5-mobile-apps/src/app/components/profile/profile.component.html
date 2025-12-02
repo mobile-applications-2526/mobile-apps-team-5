@@ -1,16 +1,16 @@
 <ng-container *ngIf="user">
-  
+
   <div class="profile-top">
     <ion-avatar class="big-avatar">
       <div class="initials">{{ getInitials() }}</div>
     </ion-avatar>
-    
+
     <div class="counts">
-      <div class="count"> 
+      <div class="count">
         <div class="num">{{ user.following || 0 }}</div>
         <div class="label">Following</div>
       </div>
-      <div class="count"> 
+      <div class="count">
         <div class="num">{{ user.followers || 0 }}</div>
         <div class="label">Followers</div>
       </div>
@@ -19,7 +19,7 @@
 
   <div class="profile-body">
     <h2 *ngIf="!edit">{{ user.full_name }}</h2>
-    
+
     <div *ngIf="!edit" class="location">{{ user.location || 'Leuven, BE' }}</div>
 
     <div class="section">
@@ -35,7 +35,7 @@
       </div>
 
       <form *ngIf="edit" [formGroup]="form">
-        
+
         <ion-item class="ion-margin-bottom">
           <ion-label position="stacked">Name</ion-label>
           <ion-input formControlName="name"></ion-input>
@@ -45,7 +45,7 @@
           <ion-label position="stacked">Bio</ion-label>
           <ion-textarea formControlName="bio" rows="3"></ion-textarea>
         </ion-item>
-        
+
         <div class="actions" style="margin-top: 15px;">
           <ion-button fill="clear" (click)="toggleEdit()">Cancel</ion-button>
           <ion-button (click)="save()" [disabled]="loading">
@@ -87,6 +87,11 @@
       </div>
       <p *ngIf="!user.pastActivities?.length" style="color:gray; font-size: 0.9em;">No past activities.</p>
     </div>
+
+    <ion-button fill="clear" routerLink="/logout" aria-label="Logout">
+      <ion-icon name="log-out-outline"></ion-icon>
+
+    </ion-button>
 
   </div>
 </ng-container>

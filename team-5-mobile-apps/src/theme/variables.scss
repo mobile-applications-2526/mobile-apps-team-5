@@ -1,2 +1,51 @@
-// For information on how to create your own theme, please see:
-// http://ionicframework.com/docs/theming/
+/* For information on how to create your own theme, please see:
+   http://ionicframework.com/docs/theming/ */
+
+:root {
+
+  --ion-color-primary: #F5C02A;
+  --ion-color-primary-rgb: 245,192,42;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0,0,0;
+  --ion-color-primary-shade: #d8a925;
+  --ion-color-primary-tint: #f6c73f;
+
+  --ion-color-secondary: #173A54;
+  --ion-color-secondary-rgb: 23,58,84;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255,255,255;
+  --ion-color-secondary-shade: #14334a;
+  --ion-color-secondary-tint: #2e4d65;
+
+  --ion-color-tertiary: #EC6553;
+  --ion-color-tertiary-rgb: 236,101,83;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255,255,255;
+  --ion-color-tertiary-shade: #d05949;
+  --ion-color-tertiary-tint: #ed7564;
+
+  --ion-color-quaternary: #12858E;
+  --ion-color-quaternary-rgb: 18,133,142;
+  --ion-color-quaternary-contrast: #ffffff;
+  --ion-color-quaternary-contrast-rgb: 255,255,255;
+  --ion-color-quaternary-shade: #10747c;
+  --ion-color-quaternary-tint: #2a9099;
+
+  --ion-color-success: #2dd36f;
+  --ion-color-warning: #ffc409;
+  --ion-color-danger: #eb445a;
+
+  --ion-color-dark: #222428;
+  --ion-color-medium: #92949c;
+  --ion-color-light: #f4f5f8;
+}
+
+/* Generate CSS classes for the new quaternary color */
+.ion-color-quaternary {
+  --ion-color-base: var(--ion-color-quaternary);
+  --ion-color-base-rgb: var(--ion-color-quaternary-rgb);
+  --ion-color-contrast: var(--ion-color-quaternary-contrast);
+  --ion-color-contrast-rgb: var(--ion-color-quaternary-contrast-rgb);
+  --ion-color-shade: var(--ion-color-quaternary-shade);
+  --ion-color-tint: var(--ion-color-quaternary-tint);
+}
