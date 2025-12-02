@@ -60,3 +60,4 @@ export class LoginPage {
     this.form.reset();
   }
 }
+

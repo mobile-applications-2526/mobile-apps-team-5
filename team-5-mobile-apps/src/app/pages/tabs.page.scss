@@ -1,1 +1,39 @@
+.navbar{
 
+    --ion-tab-bar-color: var(--ion-color-secondary-contrast);
+    --ion-background-color: var(--ion-color-secondary);
+
+    height: 65px;
+    margin-left: 10px;
+    margin-right: 10px;
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+}
+
+.navbar ion-tab-button:nth-child(3) {
+    grid-column-start: 4;
+}
+
+ion-label{
+
+  }
+
+.create-button {
+    margin-bottom: 20px;
+    --background: linear-gradient(to bottom right, var(--ion-color-primary), var(--ion-color-tertiary));
+    --color: var(--ion-color-secondary-contrast);
+    --box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+
+    width: 60px;
+    height: 60px;
+    --border-radius: 50%;
+}
+
+.create-button::part(native) {
+    flex-direction: column;
+
+}
+.create-icon {
+    --ionicon-stroke-width: 54px;
+}

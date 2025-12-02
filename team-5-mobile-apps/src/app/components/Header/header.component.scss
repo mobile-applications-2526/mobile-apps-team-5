@@ -3,17 +3,28 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: transparent;
+  background:var(--ion-color-light);;
   padding-top: 35px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.left{ display:flex; align-items:center; justify-content: center; } 
-.right { width: 44px; display:flex; align-items:center; }
+.left{ display:flex; align-items:center; justify-content: center; }
+.right { display:flex; align-items:center; }
 
 .center { flex: 1; text-align: center; display:flex; align-items:center; justify-content:center; gap:8px }
 
 .title { font-size: 20px; font-weight: 700; }
 .display-name { font-size: 14px; color: #666 }
 
-ion-button { --padding-start: 0; --padding-end: 0 }
+.avatar {
+  width: 38px;
+  height: 38px;
+  background-color: var(--ion-color-secondary);
+  color: var(--ion-color-secondary-contrast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border-radius: 50%;
+
+}
