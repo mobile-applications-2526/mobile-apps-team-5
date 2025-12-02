@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule, IonContent, IonHeader, IonTitle, IonToolbar, IonItem, IonInput, IonButton, IonLabel, ReactiveFormsModule],
   templateUrl: './login.page.html',
-  // styleUrls: ['./login.page.scss'],
+  styleUrls: ['./login.page.scss'],
 })
 export class LoginPage {
   form = this.fb.group({
@@ -27,7 +27,7 @@ export class LoginPage {
     this.loading = true; this.error = '';
     const { email, password } = this.form.value as { email: string; password: string };
     const { error } = await this.supabase.signIn(email, password);
-    
+
     if (error) {
       this.loading = false;
       this.error = error.message;

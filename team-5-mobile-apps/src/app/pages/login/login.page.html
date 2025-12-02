@@ -1,13 +1,17 @@
-<ion-header class="keep-header">
-  <ion-toolbar>
-    <ion-title>Login</ion-title>
-  </ion-toolbar>
-</ion-header>
+<!--<ion-header class="keep-header">-->
+<!--  <ion-toolbar>-->
+<!--    <ion-title>Login</ion-title>-->
+<!--  </ion-toolbar>-->
+<!--</ion-header>-->
 
 <ion-content class="ion-padding">
+  <div class="logo-container">
+    <img src="../../../assets/ActiFind_Logo.png" alt="ActiFind Logo" style="height: 150px;">
+  </div>
+
   <form (ngSubmit)="login()" [formGroup]="form">
     <ion-item>
-      <ion-label position="stacked">Email</ion-label>
+      <ion-label position="stacked" >Email</ion-label>
       <ion-input type="email" formControlName="email" placeholder="you@example.com"></ion-input>
     </ion-item>
     <ion-item>
@@ -15,7 +19,7 @@
       <ion-input type="password" formControlName="password" placeholder="••••••"></ion-input>
     </ion-item>
 
-    <div style="margin-top: 16px; display: flex; gap: 8px;">
+    <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
       <ion-button type="submit" [disabled]="loading || form.invalid" expand="block">Login</ion-button>
       <ion-button color="secondary" (click)="register()" [disabled]="loading || form.invalid" expand="block">Register</ion-button>
     </div>
