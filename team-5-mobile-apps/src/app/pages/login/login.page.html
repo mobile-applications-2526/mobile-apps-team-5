@@ -10,10 +10,21 @@
   </div>
 
   <form (ngSubmit)="login()" [formGroup]="form">
+    <!-- Email field and validation -->
+    <div *ngIf="form.get('email')?.touched && form.get('email')?.invalid" style="color: var(--ion-color-danger); margin-bottom: 4px;">
+      <div *ngIf="form.get('email')?.errors?.['required']">Email is required.</div>
+      <div *ngIf="form.get('email')?.errors?.['email']">Email must be a valid email address.</div>
+    </div>
     <ion-item>
       <ion-label position="stacked" >Email</ion-label>
       <ion-input type="email" formControlName="email" placeholder="you@example.com"></ion-input>
     </ion-item>
+
+    <!-- Password field and validation -->
+    <div *ngIf="form.get('password')?.touched && form.get('password')?.invalid" style="color: var(--ion-color-danger); margin-bottom: 4px;">
+      <div *ngIf="form.get('password')?.errors?.['required']">Password is required.</div>
+      <div *ngIf="form.get('password')?.errors?.['minlength']">Password must be at least 6 characters long.</div>
+    </div>
     <ion-item>
       <ion-label position="stacked">Password</ion-label>
       <ion-input type="password" formControlName="password" placeholder="••••••"></ion-input>
