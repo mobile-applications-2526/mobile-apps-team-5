@@ -18,10 +18,14 @@ export class SavedPage implements OnInit, OnDestroy {
   saved: any[] = [];
   sub?: Subscription;
 
-  constructor(public store: SavedStore) {}
+  constructor(public store: SavedStore) { }
 
   ngOnInit() {
     this.sub = this.store.saved$.subscribe((s) => (this.saved = s));
+  }
+
+  ionViewWillEnter() {
+    this.store.refresh();
   }
 
   ngOnDestroy() {
