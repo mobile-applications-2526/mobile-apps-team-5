@@ -1,31 +1,23 @@
-.updates-container {
+.wrapped-text {
+  white-space: normal;
+}
+
+.timestamp {
+  font-size: 0.8em;
+  color: var(--ion-color-medium);
+  margin-top: 4px;
+}
+
+.empty-state {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 8px 12px 80px 12px; /* allow space for tab bar */
-}
-.update-item {
-  display: flex;
-  gap: 12px;
   align-items: center;
-  background: #fff;
-  border-radius: 8px;
-  padding: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-}
-.update-item.unread { background: rgba(245, 245, 250, 0.9); }
-.left { flex: 0 0 48px; }
-.avatar { width: 40px; height: 40px; border-radius: 20px; background: #efe6ff; display:flex; align-items:center; justify-content:center; color:#5b21b6; font-weight:700 }
-.avatar.image { background-size: cover; background-position:center }
-.middle { flex: 1 1 auto; }
-.message { color: #111827; }
-.message strong { font-weight:700; margin-right:6px }
-.meta { color: #6b7280; font-size: 13px; margin-top:6px }
-.right { display:flex; align-items:center; gap:8px }
-.unread-dot { width:10px; height:10px; border-radius:6px; background:#ef4444 }
-.remove { background: transparent; border:none; color:#a1a1aa }
+  justify-content: center;
+  padding: 40px;
+  color: var(--ion-color-medium);
 
-@media (max-width:480px) {
-  .update-item { padding: 10px; }
-  .avatar { width: 36px; height:36px; border-radius:18px }
+  ion-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
 }

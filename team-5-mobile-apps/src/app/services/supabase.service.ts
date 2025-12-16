@@ -464,11 +464,9 @@ export class SupabaseService {
 
     // Explicitly cast to any array to avoid TS errors if types are loose
     const participants = myParticipants as any[] || [];
-    console.log('getChatRooms: Found participant entries', participants);
     const roomIds = participants.map(p => p.room_id);
 
     if (roomIds.length === 0) {
-      console.log('getChatRooms: No rooms found');
       return [];
     }
 
@@ -487,8 +485,6 @@ export class SupabaseService {
       console.error('getChatRooms: Error fetching rooms', error);
       return [];
     }
-
-    console.log('getChatRooms: Fetched rooms data', roomsData);
 
     const rooms = roomsData as any[] || [];
 
@@ -668,5 +664,130 @@ export class SupabaseService {
     if (partError) throw partError;
 
     return newRoom.id;
+  }
+
+  async markRoomRead(roomId: string) {
+    const user = await this.getCurrentUser();
+    if (!user) return;
+
+    await this._client
+      .from('chat_room_participants')
+      .update({ last_read_at: new Date().toISOString() })
+      .eq('room_id', roomId)
+      .eq('participant', user.id);
+  }
+
+  async getUnreadChats() {
+    const user = await this.getCurrentUser();
+    if (!user) return [];
+
+    // 1. Get my rooms and my last_read_at
+    const { data: myPart } = await this._client
+      .from('chat_room_participants')
+      .select('room_id, last_read_at')
+      .eq('participant', user.id);
+
+    if (!myPart || myPart.length === 0) return [];
+
+    const updates = [];
+
+    // 2. For each room, check if there are newer messages
+    for (const p of myPart) {
+      const lastRead = p.last_read_at || '1970-01-01T00:00:00Z';
+
+      const { count, error } = await this._client
+        .from('chat_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('room', p.room_id)
+        .gt('created_at', lastRead)
+        .neq('sender', user.id); // Don't count my own messages
+
+      if (error) console.error('Error counting messages', error);
+
+      if (count && count > 0) {
+        // Fetch room details for name
+        const { data: room } = await this._client
+          .from('chat_rooms')
+          .select('name')
+          .eq('id', p.room_id)
+          .single();
+
+        updates.push({
+          type: 'MESSAGE',
+          roomId: p.room_id,
+          count: count,
+          roomName: room?.name || 'Chat'
+        });
+      }
+    }
+    return updates;
+  }
+
+  async getUpcomingLikedActivities() {
+    const user = await this.getCurrentUser();
+    if (!user) return [];
+
+    // 1. Get activities I liked
+    const { data: swipes } = await this._client
+      .from('activity_swipes')
+      .select('swipe')
+      .eq('user_id', user.id)
+      .eq('liked', true);
+
+    if (!swipes || swipes.length === 0) return [];
+    const ids = swipes.map((s: any) => s.swipe);
+
+    // 2. Filter for those starting within 24h (and in future)
+    const now = new Date();
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    const { data: activities } = await this._client
+      .from('activities')
+      .select('*')
+      .in('id', ids)
+      .gt('activity_date', now.toISOString())
+      .lt('activity_date', tomorrow.toISOString());
+
+    return activities || [];
+  }
+
+  async getPopularLikedActivities() {
+    const user = await this.getCurrentUser();
+    if (!user) return [];
+
+    // 1. Get activities I liked
+    const { data: swipes } = await this._client
+      .from('activity_swipes')
+      .select('swipe')
+      .eq('user_id', user.id)
+      .eq('liked', true);
+
+    if (!swipes || swipes.length === 0) return [];
+    const ids = swipes.map((s: any) => s.swipe);
+
+    // 2. Get activities details
+    const { data: activities } = await this._client
+      .from('activities')
+      .select('*')
+      .in('id', ids);
+
+    if (!activities) return [];
+
+    const popular = [];
+
+    // 3. Check participant count for each
+    for (const act of activities) {
+      const { count } = await this._client
+        .from('activity_swipes')
+        .select('*', { count: 'exact', head: true })
+        .eq('swipe', act.id)
+        .eq('liked', true);
+
+      if (count && count >= (act.min_participants || 2)) {
+        popular.push({ ...act, current_likes: count });
+      }
+    }
+
+    return popular;
   }
 }
