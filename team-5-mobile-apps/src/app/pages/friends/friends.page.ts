@@ -5,6 +5,11 @@ import { HeaderComponent } from '../../components/Header/header.componet';
 import { FriendsListComponent } from '../../components/friends-list/friends-list.component';
 import { ChatsListComponent } from '../../components/chats-list/chats-list.component';
 import { SuggestionsListComponent } from '../../components/suggestions-list/suggestions-list.component';
+import { FriendsStore } from '../../store/friends.store';
+import { ChatsStore } from '../../store/chats.store';
+import { SuggestionsStore } from '../../store/suggestions.store';
+
+import { RequestsStore } from '../../store/requests.store';
 
 @Component({
   selector: 'app-friends',
@@ -16,5 +21,17 @@ import { SuggestionsListComponent } from '../../components/suggestions-list/sugg
 export class FriendsPage {
   segment: 'friends' | 'chats' | 'add' = 'friends';
 
-  constructor() {}
+  constructor(
+    private friendsStore: FriendsStore,
+    private chatsStore: ChatsStore,
+    private suggestionsStore: SuggestionsStore,
+    private requestsStore: RequestsStore
+  ) { }
+
+  ionViewWillEnter() {
+    this.friendsStore.loadFriends();
+    this.chatsStore.loadChats();
+    this.suggestionsStore.loadSuggestions();
+    this.requestsStore.loadRequests();
+  }
 }

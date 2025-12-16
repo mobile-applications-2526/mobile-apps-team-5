@@ -1,0 +1,36 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="close()">Cancel</ion-button>
+        </ion-buttons>
+        <ion-title>New Chat</ion-title>
+        <ion-buttons slot="end">
+            <ion-button (click)="createChat()" [disabled]="loading">Create</ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+    <ion-item>
+        <ion-label position="stacked">Group Chat Name (Optional for 1-on-1)</ion-label>
+        <ion-input [(ngModel)]="groupName" placeholder="My Awesome Group"></ion-input>
+    </ion-item>
+
+    <ion-list>
+        <ion-list-header>
+            <ion-label>Select Friends</ion-label>
+        </ion-list-header>
+
+        <div *ngIf="loading" class="ion-text-center ion-padding">
+            <ion-spinner></ion-spinner>
+        </div>
+
+        <ion-item *ngFor="let friend of friends" button (click)="friend.selected = !friend.selected">
+            <ion-checkbox slot="start" [(ngModel)]="friend.selected" (click)="$event.stopPropagation()"></ion-checkbox>
+            <ion-avatar slot="start">
+                <img [src]="friend.avatarUrl || 'assets/img/default-avatar.png'" />
+            </ion-avatar>
+            <ion-label>{{ friend.name }}</ion-label>
+        </ion-item>
+    </ion-list>
+</ion-content>

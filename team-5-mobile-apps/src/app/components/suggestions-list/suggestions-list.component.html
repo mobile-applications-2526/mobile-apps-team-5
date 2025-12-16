@@ -1,5 +1,24 @@
 <ng-container *ngIf="activeSegment === 'add'">
   <ion-searchbar placeholder="Search by username"></ion-searchbar>
+
+  <!-- Incoming Requests -->
+  <div class="suggestions-label" *ngIf="(requests$ | async)?.length">
+    Incoming Requests
+  </div>
+  <ion-list lines="none" *ngIf="(requests$ | async)?.length">
+    <ion-item *ngFor="let r of requests$ | async" lines="none">
+      <ion-avatar slot="start" class="avatar">
+        <!-- Placeholder Avatar or Initials -->
+        <div class="initials">{{ initials(r.senderName) }}</div>
+      </ion-avatar>
+      <ion-label>
+        <h3>{{ r.senderName }}</h3>
+        <p>Sent a friend request</p>
+      </ion-label>
+      <ion-button slot="end" size="small" fill="solid" (click)="accept(r.id)">Accept</ion-button>
+    </ion-item>
+  </ion-list>
+
   <div class="suggestions-label">Suggestions</div>
   <ion-list lines="none">
     <ion-item *ngFor="let s of suggestions$ | async" lines="none">
