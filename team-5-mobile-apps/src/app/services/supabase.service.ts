@@ -224,9 +224,23 @@ export class SupabaseService {
       console.error('Supabase Create Error:', error);
       throw error;
     }
-
   }
 
+  async unrecordSwipe(activityId: string) {
+    const user = await this.getCurrentUser();
+    if (!user) return;
+
+    const { error } = await this._client
+      .from('activity_swipes')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('swipe', activityId);
+
+    if (error) {
+      console.error('Error removing swipe:', error);
+      throw error;
+    }
+  }
 
   async getActivities() {
 
@@ -253,7 +267,10 @@ export class SupabaseService {
 
 
     if (swipedIds.length > 0) {
-      query = query.not('id', 'in', `(${swipedIds.join(',')})`);
+      // Supabase .not() with 'in' operator requires manual formatting of the tuple string
+      // e.g. .not('id', 'in', '(uuid1,uuid2)')
+      const filterString = `(${swipedIds.join(',')})`;
+      query = query.not('id', 'in', filterString);
     }
 
     const { data, error } = await query;
@@ -263,6 +280,40 @@ export class SupabaseService {
       return [];
     }
     return data || [];
+  }
+
+  async getSavedActivities() {
+    const user = await this.getCurrentUser();
+    if (!user) return [];
+
+    // 1. Get IDs of activities I liked
+    const { data: swipes, error: swipeError } = await this._client
+      .from('activity_swipes')
+      .select('swipe')
+      .eq('user_id', user.id)
+      .eq('liked', true);
+
+    if (swipeError) {
+      console.error('Error fetching saved:', swipeError);
+      return [];
+    }
+
+    if (!swipes || swipes.length === 0) return [];
+    const likedIds = swipes.map((s: any) => s.swipe);
+
+    // 2. Fetch activity details
+    const { data: activities, error: actError } = await this._client
+      .from('activities')
+      .select('*, interest (name)') // Join interest for category name if needed
+      .in('id', likedIds);
+
+    if (actError) {
+      console.error('Error fetching activities:', actError);
+      return [];
+    }
+
+    // Map to match internal expectations if necessary, or return as is
+    return activities || [];
   }
 
   async recordSwipe(activityId: string, liked: boolean) {

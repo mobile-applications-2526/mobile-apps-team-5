@@ -1,59 +1,52 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { EventModel } from '../models/event.model';
+import { SupabaseService } from '../services/supabase.service';
 
 @Injectable({ providedIn: 'root' })
 export class SavedStore {
-  private _saved = new BehaviorSubject<EventModel[]>([]);
-  readonly saved$: Observable<EventModel[]> = this._saved.asObservable();
+  private _saved = new BehaviorSubject<any[]>([]);
+  readonly saved$: Observable<any[]> = this._saved.asObservable();
 
-  constructor() {
-    // seed with mock saved/liked events for the Saved tab
-    const mock: EventModel[] = [
-      {
-        id: 's1',
-        name: "Dinner at Sarah's",
-        category: 'other',
-        description: 'Casual dinner meetup. Bring a plate to share and meet new people.',
-        minParticipants: 9,
-        maxParticipants: 15,
-        date: new Date(Date.now() + 4 * 24 * 3600 * 1000).toISOString(),
-        image: 'https://picsum.photos/seed/dinner/400/300',
-        location: 'Leuven',
-        friendsInterested: 2,
-        starred: false,
-      },
-      {
-        id: 's2',
-        name: 'Game night',
-        category: 'entertainment',
-        description: 'Board and video games at a cosy spot. Snacks provided.',
-        minParticipants: 4,
-        maxParticipants: 5,
-        date: new Date(Date.now() + 10 * 24 * 3600 * 1000).toISOString(),
-        image: 'https://picsum.photos/seed/game/400/300',
-        location: 'Heverlee',
-        friendsInterested: 0,
-        starred: true,
-      },
-    ];
-    this._saved.next(mock);
+  constructor(private supabase: SupabaseService) {
+    this.load();
   }
 
-  add(ev: EventModel) {
-    const current = this._saved.value;
-    if (!current.find((e) => e.id === ev.id)) {
-      this._saved.next([ev, ...current]);
+  async load() {
+    try {
+      const activities = await this.supabase.getSavedActivities();
+      // Map database structure to UI model if needed, or just use as is if compatible
+      // Assuming UI uses similar fields or we map them:
+      const saved = activities.map((a: any) => ({
+        id: a.id,
+        name: a.name,
+        category: a.interest?.name || 'other',
+        description: a.description,
+        minParticipants: a.min_participants,
+        maxParticipants: a.max_participants,
+        date: a.activity_date,
+        image: a.image_url || 'https://picsum.photos/seed/default/400/300',
+        location: a.location,
+        friendsInterested: 0, // Not yet fully implemented, could be future task
+        starred: true, // By definition, it's liked
+      }));
+      this._saved.next(saved);
+    } catch (e) {
+      console.error('Failed to load saved activities', e);
     }
   }
 
-  remove(id: string) {
-    this._saved.next(this._saved.value.filter((e) => e.id !== id));
+  // Reloads to ensure fresh data
+  refresh() {
+    this.load();
   }
 
-  toggle(ev: EventModel) {
-    const exists = this._saved.value.find((e) => e.id === ev.id);
-    if (exists) this.remove(ev.id);
-    else this.add(ev);
+  async remove(id: string) {
+    try {
+      await this.supabase.unrecordSwipe(id);
+      // Optimistic update
+      this._saved.next(this._saved.value.filter(e => e.id !== id));
+    } catch (e) {
+      console.error('Failed to remove saved item', e);
+    }
   }
 }
