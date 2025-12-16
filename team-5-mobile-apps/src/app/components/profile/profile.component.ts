@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
@@ -28,7 +29,8 @@ export class ProfileComponent implements OnChanges {
 
   constructor(
     private fb: FormBuilder,
-    private supabase: SupabaseService
+    private supabase: SupabaseService,
+    private router: Router
   ) {}
 
   // 3. Listen for changes: When Supabase data arrives, fill the form
@@ -94,4 +96,16 @@ export class ProfileComponent implements OnChanges {
     const letters = parts.map((s: string) => s[0]).join('');
     return letters.slice(0, 2).toUpperCase();
   }
+
+  async logout() {
+    try {
+      await this.supabase.signOut();
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Logout failed', e);
+    }
+    this.router.navigateByUrl('/login');
+  }
+
+  
 }

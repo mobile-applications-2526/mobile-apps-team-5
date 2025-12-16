@@ -88,7 +88,8 @@
       <p *ngIf="!user.pastActivities?.length" style="color:gray; font-size: 0.9em;">No past activities.</p>
     </div>
 
-    <ion-button fill="clear" routerLink="/logout" aria-label="Logout">
+    <ion-button fill="clear" (click)="logout()" aria-label="Logout">
+      <!-- routerLink="/logout" -->
       <ion-icon name="log-out-outline"></ion-icon>
 
     </ion-button>
