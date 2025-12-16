@@ -1,76 +1,115 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-
-export type UpdateType = 'friend_request' | 'friend_accept' | 'joined_activity' | 'activity_on';
+import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { SupabaseService } from '../services/supabase.service';
 
 export interface UpdateItem {
-  id: string;
-  type: UpdateType;
-  actorName: string;
-  actorInitials?: string;
-  message: string;
-  date: string; // ISO
-  read?: boolean;
-  avatar?: string; // optional image url
+  id: string; // unique ID for tracking (e.g. 'msg_roomId' or 'req_id')
+  type: 'FRIEND_REQUEST' | 'MESSAGE' | 'EVENT_REMINDER' | 'EVENT_POPULAR';
+  title: string;
+  description: string;
+  timestamp: string; // ISO string
+  data: any; // Context data (roomId, activityId, etc.)
+  icon?: string;
+  color?: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class UpdatesStore {
-  private _items = new BehaviorSubject<UpdateItem[]>([]);
-  readonly items$: Observable<UpdateItem[]> = this._items.asObservable();
+  private _updates = new BehaviorSubject<UpdateItem[]>([]);
+  readonly updates$ = this._updates.asObservable();
 
-  constructor() {
-    const now = Date.now();
-    const mock: UpdateItem[] = [
-      {
-        id: 'u1',
-        type: 'friend_request',
-        actorName: 'Anna Kowalska',
-        actorInitials: 'AK',
-        message: 'sent a friend request',
-        date: new Date(now - 1000 * 60 * 60 * 24).toISOString(),
-        read: false,
-      },
-      {
-        id: 'u2',
-        type: 'joined_activity',
-        actorName: 'Wei Zhang',
-        actorInitials: 'WZ',
-        message: "just joined your activity Hiking in Ardenne",
-        date: new Date(now - 1000 * 60 * 60 * 48).toISOString(),
-        read: false,
-      },
-      {
-        id: 'u3',
-        type: 'activity_on',
-        actorName: 'System',
-        message: "Your activity is on! Enough people have joined — get ready for Dinner at Sarah's.",
-        date: new Date(now - 1000 * 60 * 60 * 72).toISOString(),
-        read: false,
-        avatar: 'https://picsum.photos/seed/dinner/80/80',
-      },
-      {
-        id: 'u4',
-        type: 'friend_accept',
-        actorName: 'Elias Andersson',
-        actorInitials: 'EA',
-        message: 'accepted your friend request',
-        date: new Date(now - 1000 * 60 * 60 * 96).toISOString(),
-        read: true,
-      },
-    ];
-    this._items.next(mock);
-  }
+  private _loading = new BehaviorSubject<boolean>(false);
+  readonly loading$ = this._loading.asObservable();
 
-  markRead(id: string) {
-    this._items.next(this._items.value.map((it) => (it.id === id ? { ...it, read: true } : it)));
-  }
+  constructor(private supabase: SupabaseService) { }
 
-  remove(id: string) {
-    this._items.next(this._items.value.filter((it) => it.id !== id));
-  }
+  async loadUpdates() {
+    this._loading.next(true);
 
-  markAllRead() {
-    this._items.next(this._items.value.map((it) => ({ ...it, read: true })));
+    try {
+      // Fetch all sources in parallel
+      const [
+        friendRequests,
+        unreadChats,
+        upcomingEvents,
+        popularEvents
+      ] = await Promise.all([
+        this.supabase.getFriendRequests(),
+        this.supabase.getUnreadChats(),
+        this.supabase.getUpcomingLikedActivities(),
+        this.supabase.getPopularLikedActivities()
+      ]);
+
+      const items: UpdateItem[] = [];
+
+      // 1. Friend Requests
+      friendRequests.forEach((req: any) => {
+        items.push({
+          id: `req_${req.id}`,
+          type: 'FRIEND_REQUEST',
+          title: 'New Friend Request',
+          description: `${req.sender?.full_name || 'Someone'} wants to be friends.`,
+          timestamp: req.created_at || new Date().toISOString(),
+          data: { requestId: req.id, userId: req.sender?.id },
+          icon: 'person-add',
+          color: 'primary'
+        });
+      });
+
+      // 2. Unread Messages
+      unreadChats.forEach((chat: any) => {
+        items.push({
+          id: `msg_${chat.roomId}`,
+          type: 'MESSAGE',
+          title: chat.roomName || 'New Messages',
+          description: `You have ${chat.count} unread messages.`,
+          timestamp: new Date().toISOString(), // Use current time or fetch latest
+          data: { roomId: chat.roomId },
+          icon: 'chatbubbles',
+          color: 'success'
+        });
+      });
+
+      // 3. Upcoming Events
+      upcomingEvents.forEach((act: any) => {
+        items.push({
+          id: `event_up_${act.id}`,
+          type: 'EVENT_REMINDER',
+          title: 'Event Reminder',
+          description: `"${act.name}" is happening soon!`,
+          timestamp: act.activity_date,
+          data: { activityId: act.id },
+          icon: 'time',
+          color: 'warning'
+        });
+      });
+
+      // 4. Popular Events
+      popularEvents.forEach((act: any) => {
+        items.push({
+          id: `event_pop_${act.id}`,
+          type: 'EVENT_POPULAR',
+          title: 'Event Trending',
+          description: `"${act.name}" has reached ${act.current_likes} interested people!`,
+          timestamp: new Date().toISOString(),
+          data: { activityId: act.id },
+          icon: 'flame',
+          color: 'danger'
+        });
+      });
+
+      // Sort by newest first
+      items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+      this._updates.next(items);
+
+    } catch (e) {
+      console.error('Error loading updates:', e);
+    } finally {
+      this._loading.next(false);
+    }
   }
 }

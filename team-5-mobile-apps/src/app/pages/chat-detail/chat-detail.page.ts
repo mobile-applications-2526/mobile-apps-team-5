@@ -33,6 +33,7 @@ export class ChatDetailPage implements OnInit {
 
         this.roomId = this.route.snapshot.paramMap.get('id') || '';
         if (this.roomId) {
+            await this.supabase.markRoomRead(this.roomId);
             this.messages = await this.supabase.getMessages(this.roomId);
             this.scrollToBottom();
 

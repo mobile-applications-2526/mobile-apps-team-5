@@ -1,23 +1,19 @@
-<div class="updates-container">
+<ion-list lines="full">
   <ng-container *ngIf="items?.length; else empty">
-    <div class="update-item" *ngFor="let it of items; trackBy: trackById" (click)="markRead(it)" [class.unread]="!it.read">
-      <div class="left">
-        <div class="avatar" *ngIf="!it.avatar">{{ it.actorInitials || (it.actorName | slice:0:2) }}</div>
-        <div class="avatar image" *ngIf="it.avatar" [style.background-image]="'url(' + it.avatar + ')'" role="img"></div>
-      </div>
-      <div class="middle">
-        <div class="message"><strong>{{ it.actorName }}</strong> {{ it.message }}</div>
-        <div class="meta"><span class="date">{{ it.date | date:'MMM d' }}</span></div>
-      </div>
-      <div class="right">
-        <div *ngIf="!it.read" class="unread-dot" aria-hidden="true"></div>
-        <button class="remove" (click)="remove(it); $event.stopPropagation()" aria-label="Remove update">
-          <ion-icon name="close-circle"></ion-icon>
-        </button>
-      </div>
-    </div>
+    <ion-item *ngFor="let it of items; trackBy: trackById" button (click)="handleItemClick(it)" detail="true">
+      <ion-icon [name]="it.icon" [color]="it.color" slot="start" size="large"></ion-icon>
+      <ion-label>
+        <h3>{{ it.title }}</h3>
+        <p class="wrapped-text">{{ it.description }}</p>
+        <p class="timestamp">{{ it.timestamp | date:'short' }}</p>
+      </ion-label>
+    </ion-item>
   </ng-container>
+
   <ng-template #empty>
-    <div class="empty">You're all caught up</div>
+    <div class="empty-state">
+      <ion-icon name="checkmark-done-circle" color="medium"></ion-icon>
+      <p>You're all caught up!</p>
+    </div>
   </ng-template>
-</div>
+</ion-list>
