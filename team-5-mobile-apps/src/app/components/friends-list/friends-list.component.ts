@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Observable } from 'rxjs';
-import { friendsStore, Friend } from '../../store/friends.store';
+import { FriendsStore, Friend } from '../../store/friends.store';
 
 @Component({
   selector: 'app-friends-list',
@@ -14,7 +14,11 @@ import { friendsStore, Friend } from '../../store/friends.store';
 export class FriendsListComponent {
   @Input() activeSegment: string = 'friends';
 
-  friends$: Observable<Friend[]> = friendsStore.friends$;
+  friends$: Observable<Friend[]>;
+
+  constructor(public friendsStore: FriendsStore) {
+    this.friends$ = this.friendsStore.friends$;
+  }
 
   trackById(_: number, item: Friend) {
     return item.id;

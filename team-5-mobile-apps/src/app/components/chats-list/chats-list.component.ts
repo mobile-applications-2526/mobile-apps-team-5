@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Observable } from 'rxjs';
-import { chatsStore, ChatItem } from '../../store/chats.store';
+import { ChatsStore, ChatItem } from '../../store/chats.store';
 
 @Component({
   selector: 'app-chats-list',
@@ -13,7 +13,11 @@ import { chatsStore, ChatItem } from '../../store/chats.store';
 })
 export class ChatsListComponent {
   @Input() activeSegment: string = 'chats';
-  chats$: Observable<ChatItem[]> = chatsStore.chats$;
+  chats$: Observable<ChatItem[]>;
+
+  constructor(public chatsStore: ChatsStore) {
+    this.chats$ = this.chatsStore.chats$;
+  }
 
   trackById(_: number, item: ChatItem) {
     return item.id;
@@ -28,6 +32,6 @@ export class ChatsListComponent {
   }
 
   markRead(id: string) {
-    chatsStore.markRead(id);
+    this.chatsStore.markRead(id);
   }
 }

@@ -2,8 +2,8 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Observable } from 'rxjs';
-import { suggestionsStore } from '../../store/suggestions.store';
-import { friendsStore } from '../../store/friends.store';
+import { SuggestionsStore, Suggestion } from '../../store/suggestions.store';
+import { RequestsStore, FriendRequest } from '../../store/requests.store';
 
 @Component({
   selector: 'app-suggestions-list',
@@ -14,12 +14,23 @@ import { friendsStore } from '../../store/friends.store';
 })
 export class SuggestionsListComponent {
   @Input() activeSegment: string = 'add';
-  suggestions$: Observable<any[]> = suggestionsStore.suggestions$;
+  suggestions$: Observable<Suggestion[]>;
+  requests$: Observable<FriendRequest[]>;
+
+  constructor(
+    public suggestionsStore: SuggestionsStore,
+    public requestsStore: RequestsStore
+  ) {
+    this.suggestions$ = this.suggestionsStore.suggestions$;
+    this.requests$ = this.requestsStore.requests$;
+  }
 
   add(id: string, name: string) {
-    // add to friends store
-    friendsStore.add({ id, name } as any);
-    suggestionsStore.remove(id);
+    this.suggestionsStore.sendRequest(id);
+  }
+
+  accept(id: string) {
+    this.requestsStore.acceptRequest(id);
   }
 
   initials(name: string) {

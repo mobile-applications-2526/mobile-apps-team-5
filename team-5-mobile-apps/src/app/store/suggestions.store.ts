@@ -1,4 +1,6 @@
+import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { SupabaseService } from '../services/supabase.service';
 
 export interface Suggestion {
   id: string;
@@ -16,12 +18,31 @@ const MOCK_SUGGESTIONS: Suggestion[] = [
   { id: 's7', name: 'Amina Abd' },
 ];
 
+@Injectable({ providedIn: 'root' })
 export class SuggestionsStore {
-  private _suggestions$ = new BehaviorSubject<Suggestion[]>(MOCK_SUGGESTIONS);
+  private _suggestions$ = new BehaviorSubject<Suggestion[]>([]);
   readonly suggestions$ = this._suggestions$.asObservable();
+
+  constructor(private supabase: SupabaseService) { }
 
   get snapshot() {
     return this._suggestions$.getValue();
+  }
+
+  async loadSuggestions() {
+    const profiles = await this.supabase.getAllProfiles();
+    const suggestions: Suggestion[] = profiles.map((p: any) => ({
+      id: p.id,
+      name: p.full_name || p.username,
+      avatarUrl: p.avatar_url
+    }));
+    this._suggestions$.next(suggestions);
+  }
+
+  async sendRequest(userId: string) {
+    await this.supabase.sendFriendRequest(userId);
+    // Optimistically remove from suggestions
+    this.remove(userId);
   }
 
   remove(id: string) {
@@ -32,5 +53,3 @@ export class SuggestionsStore {
     this._suggestions$.next([s, ...this.snapshot]);
   }
 }
-
-export const suggestionsStore = new SuggestionsStore();

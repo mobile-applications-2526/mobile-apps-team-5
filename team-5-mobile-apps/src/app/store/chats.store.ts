@@ -1,4 +1,6 @@
+import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { SupabaseService } from '../services/supabase.service';
 
 export interface ChatItem {
   id: string;
@@ -6,23 +8,32 @@ export interface ChatItem {
   lastMessage: string;
   time: string; // '11:53', 'Yesterday', etc.
   unread?: number;
+  avatarUrl?: string;
 }
 
-const MOCK_CHATS: ChatItem[] = [
-  { id: '1', name: 'Anna Kowalska', lastMessage: 'See you on friday!', time: '11:53', unread: 0 },
-  { id: '2', name: 'Viktor Petrov', lastMessage: 'Supporting line text lorem ipsum…', time: '10:27', unread: 0 },
-  { id: '3', name: 'Samuel Otieno', lastMessage: 'Supporting line text lorem ipsum…', time: 'Yesterday', unread: 0 },
-  { id: '4', name: 'Alice Morgan', lastMessage: 'Supporting line text lorem ipsum…', time: 'Wednesday', unread: 0 },
-  { id: '5', name: 'List item', lastMessage: 'Supporting line text lorem ipsum…', time: '11/10/25', unread: 0 },
-  { id: '6', name: 'List item', lastMessage: 'Supporting line text lorem ipsum…', time: '09/10/25', unread: 0 },
-];
-
+@Injectable({ providedIn: 'root' })
 export class ChatsStore {
-  private _chats$ = new BehaviorSubject<ChatItem[]>(MOCK_CHATS);
+  private _chats$ = new BehaviorSubject<ChatItem[]>([]);
   readonly chats$ = this._chats$.asObservable();
+
+  constructor(private supabase: SupabaseService) { }
 
   get snapshot() {
     return this._chats$.getValue();
+  }
+
+  async loadChats() {
+    const rooms = await this.supabase.getChatRooms();
+    // getChatRooms returns objects that match ChatItem closely but might need mapping
+    const chats: ChatItem[] = rooms.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      lastMessage: r.lastMessage,
+      time: r.time,
+      unread: r.unread,
+      avatarUrl: r.avatarUrl
+    }));
+    this._chats$.next(chats);
   }
 
   add(chat: ChatItem) {
@@ -37,5 +48,3 @@ export class ChatsStore {
     this._chats$.next(this.snapshot.map((c) => (c.id === id ? { ...c, unread: 0 } : c)));
   }
 }
-
-export const chatsStore = new ChatsStore();

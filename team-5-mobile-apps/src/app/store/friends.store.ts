@@ -1,4 +1,6 @@
+import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { SupabaseService } from '../services/supabase.service';
 
 export interface Friend {
   id: string;
@@ -9,21 +11,28 @@ export interface Friend {
   avatarUrl?: string | null;
 }
 
-const MOCK_FRIENDS: Friend[] = [
-  { id: '1', name: 'Anna Kowalska', lastMessage: 'See you on friday!', lastSeen: '11:53', unread: 0 },
-  { id: '2', name: 'Viktor Petrov', lastMessage: 'Supporting line text lorem ipsum…', lastSeen: '10:27', unread: 0 },
-  { id: '3', name: 'Samuel Otieno', lastMessage: 'Supporting line text lorem ipsum…', lastSeen: 'Yesterday', unread: 0 },
-  { id: '4', name: 'Alice Morgan', lastMessage: 'Supporting line text lorem ipsum…', lastSeen: 'Wednesday', unread: 0 },
-  { id: '5', name: 'List item', lastMessage: 'Supporting line text lorem ipsum…', lastSeen: '11/10/25', unread: 0 },
-  { id: '6', name: 'List item', lastMessage: 'Supporting line text lorem ipsum…', lastSeen: '09/10/25', unread: 0 },
-];
-
+@Injectable({ providedIn: 'root' })
 export class FriendsStore {
-  private _friends$ = new BehaviorSubject<Friend[]>(MOCK_FRIENDS);
+  private _friends$ = new BehaviorSubject<Friend[]>([]);
   readonly friends$ = this._friends$.asObservable();
+
+  constructor(private supabase: SupabaseService) { }
 
   get snapshot() {
     return this._friends$.getValue();
+  }
+
+  async loadFriends() {
+    const profiles = await this.supabase.getFriends();
+    const friends: Friend[] = profiles.map((p: any) => ({
+      id: p.id,
+      name: p.full_name || p.username,
+      lastMessage: '',
+      lastSeen: '',
+      unread: 0,
+      avatarUrl: p.avatar_url
+    }));
+    this._friends$.next(friends);
   }
 
   add(friend: Friend) {
@@ -41,5 +50,3 @@ export class FriendsStore {
     this._friends$.next(next);
   }
 }
-
-export const friendsStore = new FriendsStore();
