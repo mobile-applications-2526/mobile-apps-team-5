@@ -1,8 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { FriendsStore, Friend } from '../../store/friends.store';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-friends-list',
@@ -16,8 +18,21 @@ export class FriendsListComponent {
 
   friends$: Observable<Friend[]>;
 
-  constructor(public friendsStore: FriendsStore) {
+  constructor(
+    public friendsStore: FriendsStore,
+    private router: Router,
+    private supabase: SupabaseService
+  ) {
     this.friends$ = this.friendsStore.friends$;
+  }
+
+  async startChat(friendId: string) {
+    try {
+      const roomId = await this.supabase.startDirectChat(friendId);
+      this.router.navigate(['/chats', roomId]);
+    } catch (e) {
+      console.error('Error starting chat:', e);
+    }
   }
 
   trackById(_: number, item: Friend) {

@@ -452,16 +452,25 @@ export class SupabaseService {
     if (!user) return [];
 
     // 1. Get IDs of rooms I am in
-    const { data: myParticipants } = await this._client
+    const { data: myParticipants, error: partError } = await this._client
       .from('chat_room_participants')
       .select('room_id')
       .eq('participant', user.id);
 
+    if (partError) {
+      console.error('getChatRooms: Error fetching participants', partError);
+      return [];
+    }
+
     // Explicitly cast to any array to avoid TS errors if types are loose
     const participants = myParticipants as any[] || [];
+    console.log('getChatRooms: Found participant entries', participants);
     const roomIds = participants.map(p => p.room_id);
 
-    if (roomIds.length === 0) return [];
+    if (roomIds.length === 0) {
+      console.log('getChatRooms: No rooms found');
+      return [];
+    }
 
     // 2. Fetch the rooms, AND the *other* participants for those rooms
     const { data: roomsData, error } = await this._client
@@ -475,9 +484,11 @@ export class SupabaseService {
       .in('id', roomIds);
 
     if (error) {
-      console.error('Error fetching rooms:', error);
+      console.error('getChatRooms: Error fetching rooms', error);
       return [];
     }
+
+    console.log('getChatRooms: Fetched rooms data', roomsData);
 
     const rooms = roomsData as any[] || [];
 
@@ -540,7 +551,7 @@ export class SupabaseService {
   async getMessages(roomId: string) {
     const { data, error } = await this._client
       .from('chat_messages')
-      .select('*, sender:sender(username, full_name, avatar_url)')
+      .select('*, sender:sender(id, username, full_name, avatar_url)')
       .eq('room', roomId)
       .order('created_at', { ascending: true });
 
@@ -566,4 +577,96 @@ export class SupabaseService {
     if (error) throw error;
   }
 
+  async startDirectChat(friendId: string) {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('Not logged in');
+
+    // 1. Check if a direct chat already exists
+    // Get all rooms I am in
+    const { data: myRooms } = await this._client
+      .from('chat_room_participants')
+      .select('room_id')
+      .eq('participant', user.id);
+
+    const myRoomIds = myRooms?.map((r: any) => r.room_id) || [];
+
+    if (myRoomIds.length > 0) {
+      // Check which of these rooms the friend is also in
+      const { data: commonRooms } = await this._client
+        .from('chat_room_participants')
+        .select('room_id')
+        .in('room_id', myRoomIds)
+        .eq('participant', friendId);
+
+      // If we find a common room, we need to check if it's a direct chat (only 2 people)
+      if (commonRooms && commonRooms.length > 0) {
+        for (const room of commonRooms) {
+          const { count } = await this._client
+            .from('chat_room_participants')
+            .select('*', { count: 'exact', head: true })
+            .eq('room_id', room.room_id);
+
+          if (count === 2) {
+            return room.room_id; // Found existing direct chat
+          }
+        }
+      }
+    }
+
+    // 2. No existing room found, create a new one
+    const { data: newRoom, error: roomError } = await this._client
+      .from('chat_rooms')
+      .insert({
+        name: 'Direct Chat',
+        creator: user.id
+      })
+      .select()
+      .single();
+
+    if (roomError) throw roomError;
+
+    // 3. Add participants
+    const { error: partError } = await this._client
+      .from('chat_room_participants')
+      .insert([
+        { room_id: newRoom.id, participant: user.id },
+        { room_id: newRoom.id, participant: friendId }
+      ]);
+
+    if (partError) throw partError;
+
+    return newRoom.id;
+  }
+
+  async createGroupChat(name: string, participantIds: string[]) {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('Not logged in');
+
+    // 1. Create Room
+    const { data: newRoom, error: roomError } = await this._client
+      .from('chat_rooms')
+      .insert({
+        name: name,
+        creator: user.id
+      })
+      .select()
+      .single();
+
+    if (roomError) throw roomError;
+
+    // 2. Add all participants (including self)
+    const allParticipants = [user.id, ...participantIds];
+    const participantsData = allParticipants.map(uid => ({
+      room_id: newRoom.id,
+      participant: uid
+    }));
+
+    const { error: partError } = await this._client
+      .from('chat_room_participants')
+      .insert(participantsData);
+
+    if (partError) throw partError;
+
+    return newRoom.id;
+  }
 }

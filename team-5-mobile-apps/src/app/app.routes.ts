@@ -12,11 +12,11 @@ export const routes: Routes = [
   },
   {
     path: 'profile-setup',
-    loadComponent: () => import('./pages/profile-setup/profile-setup.page').then( m => m.ProfileSetupPage)
+    loadComponent: () => import('./pages/profile-setup/profile-setup.page').then(m => m.ProfileSetupPage)
   },
   {
-    path: '**',
-    redirectTo: '/tabs/explore',
+    path: 'chats/:id',
+    loadComponent: () => import('./pages/chat-detail/chat-detail.page').then(m => m.ChatDetailPage),
   },
- 
+
 ];

@@ -1,7 +1,7 @@
 <ng-container *ngIf="activeSegment === 'friends'">
   <ion-searchbar placeholder="Search by username"></ion-searchbar>
   <ion-list lines="none">
-    <ion-item *ngFor="let f of friends$ | async; trackBy: trackById" button>
+    <ion-item *ngFor="let f of friends$ | async; trackBy: trackById" button (click)="startChat(f.id)">
       <ion-avatar slot="start" class="avatar">
         <div class="initials">{{ initials(f.name) }}</div>
       </ion-avatar>
