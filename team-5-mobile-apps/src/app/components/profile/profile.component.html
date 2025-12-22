@@ -74,7 +74,8 @@
     <div class="section">
       <h3>Upcoming activities</h3>
       <div *ngFor="let a of user.upcomingActivities || []" class="activity-card">
-        <h4>{{ a.name }}</h4> <div class="meta">📅 {{ a.date }} • 📍 {{ a.location }}</div>
+        <h4>{{ a.name }}</h4>
+        <div class="meta">📅 {{ a.date }} • 📍 {{ a.location }}</div>
       </div>
       <p *ngIf="!user.upcomingActivities?.length" style="color:gray; font-size: 0.9em;">No upcoming activities.</p>
     </div>
@@ -88,10 +89,12 @@
       <p *ngIf="!user.pastActivities?.length" style="color:gray; font-size: 0.9em;">No past activities.</p>
     </div>
 
-    <ion-button fill="clear" (click)="logout()" aria-label="Logout">
-      <ion-icon name="log-out-outline"></ion-icon>
-
-    </ion-button>
+    <div class="logout-section" style="margin-top: 40px; margin-bottom: 80px;">
+      <ion-button expand="block" color="danger" (click)="logout()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Logout
+      </ion-button>
+    </div>
 
   </div>
 </ng-container>

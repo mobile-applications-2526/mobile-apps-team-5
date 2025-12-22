@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonSpinner,IonButtons, IonButton, IonIcon, NavController } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonSpinner, IonButtons, IonButton, IonIcon, NavController } from '@ionic/angular/standalone';
 import { ProfileComponent } from '../../components/profile/profile.component';
 import { SupabaseService } from '../../services/supabase.service';
 
@@ -9,16 +9,16 @@ import { SupabaseService } from '../../services/supabase.service';
   standalone: true,
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
-  imports: [IonHeader, CommonModule, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSpinner,ProfileComponent],
+  imports: [IonHeader, CommonModule, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSpinner, ProfileComponent],
 })
 export class ProfilePage {
-  profile: any = null; 
+  profile: any = null;
   loading: boolean = true;
 
   constructor(
     private nav: NavController,
     private supabase: SupabaseService
-  ) {}
+  ) { }
 
   async ngOnInit() {
     await this.loadProfile();
@@ -36,7 +36,7 @@ export class ProfilePage {
   }
 
   goBack() {
-    
+
     try {
       if (window.history.length > 1) {
         this.nav.back();

@@ -1,14 +1,25 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, IonContent } from '@ionic/angular';
+import {
+    IonContent, IonHeader, IonToolbar, IonButtons,
+    IonBackButton, IonTitle, IonFooter, IonInput, IonButton, IonIcon
+} from '@ionic/angular/standalone';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SupabaseService } from '../../services/supabase.service';
+import { addIcons } from 'ionicons';
+import { send } from 'ionicons/icons';
 
 @Component({
     selector: 'app-chat-detail',
     standalone: true,
-    imports: [CommonModule, FormsModule, IonicModule, RouterModule],
+    imports: [
+        CommonModule,
+        FormsModule,
+        RouterModule,
+        IonContent, IonHeader, IonToolbar, IonButtons,
+        IonBackButton, IonTitle, IonFooter, IonInput, IonButton, IonIcon
+    ],
     templateUrl: './chat-detail.page.html',
     styleUrls: ['./chat-detail.page.scss'],
 })
@@ -25,7 +36,9 @@ export class ChatDetailPage implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private supabase: SupabaseService
-    ) { }
+    ) {
+        addIcons({ send });
+    }
 
     async ngOnInit() {
         const user = await this.supabase.getCurrentUser();

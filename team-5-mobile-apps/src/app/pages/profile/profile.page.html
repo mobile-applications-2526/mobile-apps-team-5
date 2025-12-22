@@ -1,20 +1,20 @@
-<ion-header class="keep-header" [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button fill="clear" (click)="goBack()" aria-label="Back to explore">
-        <ion-icon name="chevron-back"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>Profile</ion-title>
-  </ion-toolbar>
-</ion-header>
+<div class="ion-page">
+  <ion-header class="keep-header" [translucent]="true">
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button fill="clear" (click)="goBack()" aria-label="Back to explore">
+          <ion-icon name="chevron-back"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+      <ion-title>Profile</ion-title>
+    </ion-toolbar>
+  </ion-header>
 
-<ion-content>
-  <div *ngIf="loading" style="text-align: center; margin-top: 50%;">
-    <ion-spinner name="crescent"></ion-spinner>
-  </div>
-  <app-profile 
-    *ngIf="!loading && profile" 
-    [user]="profile">
-  </app-profile>
-</ion-content>
+  <ion-content>
+    <div *ngIf="loading" style="text-align: center; margin-top: 50%;">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+    <app-profile *ngIf="!loading && profile" [user]="profile">
+    </app-profile>
+  </ion-content>
+</div>

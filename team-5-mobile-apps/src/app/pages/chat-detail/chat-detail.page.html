@@ -1,55 +1,57 @@
-<ion-header>
-    <ion-toolbar>
-        <ion-buttons slot="start">
-            <ion-back-button defaultHref="/tabs/friends"></ion-back-button>
-        </ion-buttons>
-        <ion-title>{{ roomName }}</ion-title>
-    </ion-toolbar>
-</ion-header>
+<div class="ion-page">
+    <ion-header>
+        <ion-toolbar>
+            <ion-buttons slot="start">
+                <ion-back-button defaultHref="/tabs/friends"></ion-back-button>
+            </ion-buttons>
+            <ion-title>{{ roomName }}</ion-title>
+        </ion-toolbar>
+    </ion-header>
 
-<ion-content class="ion-padding">
-    <div class="messages">
-        <div *ngFor="let msg of messages" class="message"
-            [class.my-message]="msg.sender?.id === currentUserId || msg.sender === currentUserId">
-            <!-- Check against currentUserId. Note: msg.sender is likely an object from getMessages join, or just ID if no join. -->
-            <!-- getMessages selects *, sender:sender(...) so msg.sender matches the ID in msg.sender column? 
-           Wait, in SupabaseService getMessages: .select('*, sender:sender(username, full_name, avatar_url)') 
-           This means the underlying 'sender' column (UUID) is replaced by the object? 
-           Actually Supabase returns the foreign key value AND the joined object if aliased differently or if ambiguous.
-           But usually: select('*, sender:sender(...)') might replace 'sender' key with object if column is named sender.
-           However, let's assume 'sender' in the message ROW is the ID, and the JOINED 'sender' is the object. 
-           If alias is same name as column, it overwrites.
-           Let's check SupabaseService again.
-           .select('*, sender:sender(username, full_name, avatar_url)')
-           Since '*' includes 'sender' (column), and then we define 'sender:sender(...)', it might overwrite or add as 'sender'.
-           Let's check if msg.sender is object or string. We used msg.sender.username in HTML.
-           So msg.sender is the object. 
-           But we need the ID to compare. 
-           The original row had 'sender' as UUID. 
-           Typically when you alias a relation to the same name as a column, it overwrites the column value in the result object in JS client.
-           So we might lose the sender ID unless we also specific 'sender_id' if that column exists, or rely on something else.
-           Key fix: check if we can select 'sender_id:sender' to keep 'sender' as ID? Or just select 'sender' column explicitly?
-           Actually, the message table has 'sender' column.
-           Let's assume the object in msg.sender does NOT have the ID unless we requested it.
-           We requested (username, full_name, avatar_url). We should request ID too.
-      -->
-            <div class="bubble">
-                <div class="sender-name">{{ msg.sender?.full_name || msg.sender?.username }}</div>
-                {{ msg.content }}
+    <ion-content class="ion-padding">
+        <div class="messages">
+            <div *ngFor="let msg of messages" class="message"
+                [class.my-message]="msg.sender?.id === currentUserId || msg.sender === currentUserId">
+                <!-- Check against currentUserId. Note: msg.sender is likely an object from getMessages join, or just ID if no join. -->
+                <!-- getMessages selects *, sender:sender(...) so msg.sender matches the ID in msg.sender column? 
+               Wait, in SupabaseService getMessages: .select('*, sender:sender(username, full_name, avatar_url)') 
+               This means the underlying 'sender' column (UUID) is replaced by the object? 
+               Actually Supabase returns the foreign key value AND the joined object if aliased differently or if ambiguous.
+               But usually: select('*, sender:sender(...)') might replace 'sender' key with object if column is named sender.
+               However, let's assume 'sender' in the message ROW is the ID, and the JOINED 'sender' is the object. 
+               If alias is same name as column, it overwrites.
+               Let's check SupabaseService again.
+               .select('*, sender:sender(username, full_name, avatar_url)')
+               Since '*' includes 'sender' (column), and then we define 'sender:sender(...)', it might overwrite or add as 'sender'.
+               Let's check if msg.sender is object or string. We used msg.sender.username in HTML.
+               So msg.sender is the object. 
+               But we need the ID to compare. 
+               The original row had 'sender' as UUID. 
+               Typically when you alias a relation to the same name as a column, it overwrites the column value in the result object in JS client.
+               So we might lose the sender ID unless we also specific 'sender_id' if that column exists, or rely on something else.
+               Key fix: check if we can select 'sender_id:sender' to keep 'sender' as ID? Or just select 'sender' column explicitly?
+               Actually, the message table has 'sender' column.
+               Let's assume the object in msg.sender does NOT have the ID unless we requested it.
+               We requested (username, full_name, avatar_url). We should request ID too.
+          -->
+                <div class="bubble">
+                    <div class="sender-name">{{ msg.sender?.full_name || msg.sender?.username }}</div>
+                    {{ msg.content }}
+                </div>
+                <div class="time">{{ msg.created_at | date:'shortTime' }}</div>
             </div>
-            <div class="time">{{ msg.created_at | date:'shortTime' }}</div>
         </div>
-    </div>
-</ion-content>
+    </ion-content>
 
-<ion-footer>
-    <ion-toolbar>
-        <div class="input-bar">
-            <ion-input [(ngModel)]="newMessage" placeholder="Type a message" (keyup.enter)="sendMessage()">
-            </ion-input>
-            <ion-button (click)="sendMessage()" fill="clear">
-                <ion-icon name="send"></ion-icon>
-            </ion-button>
-        </div>
-    </ion-toolbar>
-</ion-footer>
+    <ion-footer>
+        <ion-toolbar>
+            <div class="input-bar">
+                <ion-input [(ngModel)]="newMessage" placeholder="Type a message" (keyup.enter)="sendMessage()">
+                </ion-input>
+                <ion-button (click)="sendMessage()" fill="clear">
+                    <ion-icon name="send"></ion-icon>
+                </ion-button>
+            </div>
+        </ion-toolbar>
+    </ion-footer>
+</div>

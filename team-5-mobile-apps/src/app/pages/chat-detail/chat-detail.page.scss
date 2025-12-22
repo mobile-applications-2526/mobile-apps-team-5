@@ -14,7 +14,7 @@
     border-radius: 12px;
     color: black;
   }
-  
+
   .sender-name {
     font-size: 0.7em;
     color: #666;
@@ -23,10 +23,14 @@
 
   &.my-message {
     align-self: flex-end;
+
     .bubble {
       background: var(--ion-color-primary);
       color: white;
-      .sender-name { color: #ddd; }
+
+      .sender-name {
+        color: #ddd;
+      }
     }
   }
 }
@@ -35,4 +39,12 @@
   display: flex;
   align-items: center;
   padding: 0 10px;
+
+  ion-input {
+    flex: 1;
+  }
+
+  ion-button {
+    flex-shrink: 0;
+  }
 }
