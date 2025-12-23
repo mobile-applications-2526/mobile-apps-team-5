@@ -28,6 +28,10 @@ export class SavedPage implements OnInit, OnDestroy {
     this.store.refresh();
   }
 
+  onItemRemoved(deletedId: string) {
+    this.saved = this.saved.filter(activity => activity.id !== deletedId);
+  }
+
   ngOnDestroy() {
     this.sub?.unsubscribe();
   }

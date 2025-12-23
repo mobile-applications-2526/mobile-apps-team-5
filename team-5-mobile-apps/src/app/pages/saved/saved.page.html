@@ -18,7 +18,10 @@
   <div class="saved-list">
     <ng-container *ngIf="saved?.length; else empty">
       <ng-container *ngFor="let ev of saved">
-        <app-saved-event [event]="ev"></app-saved-event>
+        <app-saved-event 
+        [event]="ev" 
+        (removeClicked)="onItemRemoved($event)"> 
+  </app-saved-event>
       </ng-container>
     </ng-container>
     <ng-template #empty>

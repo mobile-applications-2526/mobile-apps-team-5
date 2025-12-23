@@ -316,6 +316,24 @@ export class SupabaseService {
     return activities || [];
   }
 
+  async getMutualFriendsCount(activityId: string): Promise<number> {
+    const user = await this.getCurrentUser();
+    if (!user) return 0;
+
+    // Calls the SQL function 'get_mutual_friends_count'
+    const { data, error } = await this._client.rpc('get_mutual_friends_count', {
+      activity_uuid: activityId,
+      current_user_uuid: user.id
+    });
+
+    if (error) {
+      // It's okay to fail silently and just show 0
+      console.error('Error fetching mutual friends:', error);
+      return 0;
+    }
+    return data || 0;
+  }
+
   async recordSwipe(activityId: string, liked: boolean) {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not logged in');
@@ -854,5 +872,38 @@ export class SupabaseService {
     }
 
     return popular;
+  }
+
+  async toggleActivityStar(activityId: string, isStarred: boolean) {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('Not logged in');
+
+    const { error } = await this._client
+      .from('activity_swipes')
+      .update({ starred: isStarred }) 
+      .eq('user_id', user.id)
+      .eq('swipe', activityId);
+
+    if (error) {
+      console.error('Error updating star status:', error);
+      throw error;
+    }
+  }
+
+  // NEW: Remove an activity from the saved list (Delete the swipe)
+  async removeSavedActivity(activityId: string) {
+    const user = await this.getCurrentUser();
+    if (!user) return;
+
+    const { error } = await this._client
+      .from('activity_swipes')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('swipe', activityId);
+
+    if (error) {
+      console.error('Error removing saved activity:', error);
+      throw error;
+    }
   }
 }

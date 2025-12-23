@@ -1,8 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { EventModel } from '../../models/event.model';
-import { SavedStore } from '../../store/saved.store';
+import { SupabaseService } from 'src/app/services/supabase.service';
 
 @Component({
   selector: 'app-saved-event',
@@ -11,23 +10,54 @@ import { SavedStore } from '../../store/saved.store';
   templateUrl: './saved-event.component.html',
   styleUrls: ['./saved-event.component.scss'],
 })
-export class SavedEventComponent {
-  @Input() event!: EventModel;
+export class SavedEventComponent implements OnInit{
+  @Input() event!: any;
 
-  constructor(private store: SavedStore) {}
+  @Output() removeClicked = new EventEmitter<string>();
 
-  remove() {
+  friendsCount: number = 0;
+
+  constructor(private supabase: SupabaseService) {}
+
+  async ngOnInit() {
+    if (this.event?.id) {
+      // Fetch the real count of friends who also liked this specific activity
+      try {
+        this.friendsCount = await this.supabase.getMutualFriendsCount(this.event.id);
+      } catch (error) {
+        console.error('Error loading friends count:', error);
+      }
+    }
+  }
+
+  async remove(ev?: Event) {
+    if (ev) ev.stopPropagation(); // Prevents clicking the heart from opening card details
     if (!this.event?.id) return;
-    this.store.remove(this.event.id);
-  }
 
-  toggleStar() {
-    if (!this.event) return;
-    // locally toggle starred flag — for mock/demo only
-    this.event.starred = !this.event.starred;
-  }
+    try {
+      await this.supabase.removeSavedActivity(this.event.id);
+      this.removeClicked.emit(this.event.id);
+    } catch (error) {
+      console.error('Could not remove activity', error);
+    }}
 
+  async toggleStar(ev?: Event) {
+      if (ev) ev.stopPropagation();
+      if (!this.event) return;
+  
+      const newStatus = !this.event.starred;
+      
+      this.event.starred = newStatus;
+  
+      try {
+        await this.supabase.toggleActivityStar(this.event.id, newStatus);
+      } catch (error) {
+        console.error('Failed to star item', error);
+        this.event.starred = !newStatus; 
+      }
+    }
+  
   get participantsLabel() {
     return `${this.event.minParticipants}/${this.event.maxParticipants}`;
   }
-}
+  }
