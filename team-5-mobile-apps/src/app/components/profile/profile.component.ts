@@ -41,6 +41,7 @@ export class ProfileComponent implements OnChanges {
         // location: this.user.location || '', // Uncomment if you added location to DB
         bio: this.user.bio || ''
       });
+      this.loadFriendsCount();
     }
   }
 
@@ -83,6 +84,17 @@ export class ProfileComponent implements OnChanges {
       alert('Could not save profile.');
     } finally {
       this.loading = false;
+    }
+  }
+
+  async loadFriendsCount() {
+    if (!this.user?.id) return;
+    try {
+      
+      const count = await this.supabase.getFriendsCount(this.user.id);
+      this.user.friendsCount = count;
+    } catch (e) {
+      console.error('Error loading friends count', e);
     }
   }
 

@@ -497,6 +497,20 @@ export class SupabaseService {
     return profiles || [];
   }
 
+  async getFriendsCount(userId: string): Promise<number> {
+    const { count, error } = await this._client
+      .from('friendships')
+      .select('*', { count: 'exact', head: true })
+      .or(`user_id_1.eq.${userId},user_id_2.eq.${userId}`)
+      .eq('status', 'accepted');
+  
+    if (error) {
+      console.error('Error counting friends:', error);
+      return 0;
+    }
+    return count || 0;
+  }
+
   // Chat
   async getChatRooms() {
     const user = await this.getCurrentUser();
