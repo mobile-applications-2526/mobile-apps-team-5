@@ -6,7 +6,7 @@
     </ion-avatar>
 
     <div class="counts">
-      <div class="count">
+      <div class="count" (click)="goToFriendsPage()" style="cursor: pointer;">
         <div class="num">{{ user.friendsCount || 0 }}</div>
         <div class="label">Friends</div>
       </div>

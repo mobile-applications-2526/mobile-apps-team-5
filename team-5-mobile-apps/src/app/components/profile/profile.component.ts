@@ -109,6 +109,10 @@ export class ProfileComponent implements OnChanges {
     return letters.slice(0, 2).toUpperCase();
   }
 
+  goToFriendsPage() {
+    this.router.navigate(['/tabs/friends']);
+  }
+
   async logout() {
     try {
       await this.supabase.signOut();
