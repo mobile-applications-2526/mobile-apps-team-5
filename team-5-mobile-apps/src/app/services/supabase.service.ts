@@ -320,7 +320,6 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return 0;
 
-    // Calls the SQL function 'get_mutual_friends_count'
     const { data, error } = await this._client.rpc('get_mutual_friends_count', {
       activity_uuid: activityId,
       current_user_uuid: user.id

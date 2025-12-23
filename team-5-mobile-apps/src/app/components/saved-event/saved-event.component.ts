@@ -21,12 +21,8 @@ export class SavedEventComponent implements OnInit{
 
   async ngOnInit() {
     if (this.event?.id) {
-      // Fetch the real count of friends who also liked this specific activity
-      try {
-        this.friendsCount = await this.supabase.getMutualFriendsCount(this.event.id);
-      } catch (error) {
-        console.error('Error loading friends count:', error);
-      }
+      this.friendsCount = await this.supabase.getMutualFriendsCount(this.event.id);
+      console.log('Mutual Friends for', this.event.name, ':', this.friendsCount);
     }
   }
 
