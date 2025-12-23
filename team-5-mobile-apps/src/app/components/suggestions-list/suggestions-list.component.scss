@@ -2,3 +2,20 @@
 .initials { width: 40px; height: 40px; border-radius: 50%; display:flex; align-items:center; justify-content:center; background: rgba(142,76,255,0.12); color: rgba(72,0,120,0.9); font-weight:600; }
 ion-item { --min-height: 56px; }
 ion-button[color="tertiary"] { background: #7a4de6; color: #fff; border-radius: 16px; }
+
+
+ion-searchbar {
+  --background: var(--ion-color-medium);
+  --color: #222;
+  --placeholder-color: #777;
+  --icon-color: #555;
+  --clear-button-color: #555;
+
+  --border-radius: 12px;
+  --box-shadow: none;
+  max-width: 90%;
+
+  margin: auto;
+  margin-bottom: 8px;
+  margin-top: 5px;
+}

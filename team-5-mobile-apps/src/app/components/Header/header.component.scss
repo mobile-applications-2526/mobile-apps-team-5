@@ -1,4 +1,6 @@
 .header-bar {
+  position: sticky;
+  top: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -6,10 +8,14 @@
   background:var(--ion-color-light);;
   padding-top: 35px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 100px;
 }
 
+
+
 .left{ display:flex; align-items:center; justify-content: center; }
-.right { display:flex; align-items:center; }
+.right { display:flex; align-items:center; justify-content: center;}
 
 .center { flex: 1; text-align: center; display:flex; align-items:center; justify-content:center; gap:8px }
 
@@ -26,5 +32,6 @@
   justify-content: center;
   font-weight: bold;
   border-radius: 50%;
+  margin-top: 10px;
 
 }
