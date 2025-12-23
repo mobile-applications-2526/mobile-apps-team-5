@@ -1,5 +1,5 @@
 <div class="saved-card-component">
-  <div class="thumb" [style.background-image]="'url(' + event.image + ')'" role="img" aria-label="{{event.name}}"></div>
+  <div class="thumb" [style.background-image]="'url(' + (event.image_url || event.image) + ')'" role="img" aria-label="{{event.name}}"></div>
   <div class="info">
     <div class="row top">
       <h3>{{ event.name }}</h3>
@@ -16,7 +16,7 @@
 
     <p class="meta-row">
       <ion-icon name="calendar-outline"></ion-icon>
-      <span class="date">{{ event.date | date:'MMM d' }}</span>
+      <span class="date">{{ (event.activity_date || event.date) | date:'MMM d' }}</span>
       <ion-icon name="people-outline"></ion-icon>
       <span class="parts">{{ participantsLabel }}</span>
     </p>
@@ -26,11 +26,13 @@
       <span>{{ event.location || event.category }}</span>
     </p>
 
-    <p class="friends" *ngIf="friendsCount > 0">
-      <span class="friends-count">
+    <div class="friends-slot">
+      <ion-skeleton-text *ngIf="loadingFriends" animated style="width: 60%; height: 12px;"></ion-skeleton-text>
+      
+      <p class="friends" *ngIf="!loadingFriends && friendsCount > 0">
         {{ friendsCount }} {{ friendsCount === 1 ? 'friend is' : 'friends are' }} interested
-      </span>
-      <ion-icon name="people-circle" color="tertiary"></ion-icon>
-    </p>
+        <ion-icon name="people-circle" color="tertiary"></ion-icon>
+      </p>
+    </div>
   </div>
 </div>

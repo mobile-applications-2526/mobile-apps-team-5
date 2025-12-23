@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
+import { SavedEventComponent } from '../saved-event/saved-event.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, IonicModule, ReactiveFormsModule],
+  imports: [CommonModule, IonicModule, ReactiveFormsModule, SavedEventComponent],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
 })
@@ -16,6 +17,10 @@ export class ProfileComponent implements OnChanges {
   
   // 1. Receive data from the Parent Page
   @Input() user: any = null;
+
+  upcomingEvents: any[] = [];
+  pastEvents: any[] = [];
+  loadingActivities = true;
 
   edit = false;
   loading = false;
@@ -42,6 +47,7 @@ export class ProfileComponent implements OnChanges {
         bio: this.user.bio || ''
       });
       this.loadFriendsCount();
+      this.loadActivities();
     }
   }
 
@@ -98,6 +104,8 @@ export class ProfileComponent implements OnChanges {
     }
   }
 
+  
+
   // Helper to get initials from the Real Data
   getInitials() {
     const name = this.user?.full_name || ''; // Use full_name from DB
@@ -112,6 +120,28 @@ export class ProfileComponent implements OnChanges {
   goToFriendsPage() {
     this.router.navigate(['/tabs/friends'], { queryParams: { segment: 'friends' } });
   }
+
+  async loadActivities() {
+    this.loadingActivities = true;
+    try {
+      // Promise.all runs them at the same time for speed
+      const [upcoming, past] = await Promise.all([
+        this.supabase.getUpcomingSavedActivities(),
+        this.supabase.getPastSavedActivities()
+      ]);
+      this.upcomingEvents = upcoming;
+      this.pastEvents = past;
+    } finally {
+      this.loadingActivities = false;
+    }
+  }
+
+  onItemRemoved(id: string) {
+    this.upcomingEvents = this.upcomingEvents.filter(e => e.id !== id);
+    this.pastEvents = this.pastEvents.filter(e => e.id !== id);
+  }
+
+  
 
   async logout() {
     try {

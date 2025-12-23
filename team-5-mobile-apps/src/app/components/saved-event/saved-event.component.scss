@@ -1,4 +1,5 @@
 .saved-card-component {
+  height: 130px;
   display: flex;
   gap: 10px;
   align-items: center;
@@ -14,6 +15,12 @@
   background-position: center;
   border-radius: 8px;
   flex: 0 0 80px;
+}
+
+.friends-slot {
+  height: 20px; // Reserves vertical space even if empty
+  display: flex;
+  align-items: center;
 }
 .saved-card-component .info { flex: 1 1 auto; }
 .saved-card-component .row.top { display:flex; align-items:center; justify-content:space-between; }

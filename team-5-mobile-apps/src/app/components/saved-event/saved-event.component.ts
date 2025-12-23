@@ -12,17 +12,24 @@ import { SupabaseService } from 'src/app/services/supabase.service';
 })
 export class SavedEventComponent implements OnInit{
   @Input() event!: any;
+  actualParticipants: number = 0;
 
   @Output() removeClicked = new EventEmitter<string>();
 
   friendsCount: number = 0;
-
+  loadingFriends = true;
   constructor(private supabase: SupabaseService) {}
 
   async ngOnInit() {
     if (this.event?.id) {
-      this.friendsCount = await this.supabase.getMutualFriendsCount(this.event.id);
-      console.log('Mutual Friends for', this.event.name, ':', this.friendsCount);
+      const [fCount, pCount] = await Promise.all([
+        this.supabase.getMutualFriendsCount(this.event.id),
+        this.supabase.getParticipantCount(this.event.id) 
+      ]);
+      
+      this.friendsCount = fCount;
+      this.actualParticipants = pCount;
+      this.loadingFriends = false;
     }
   }
 
@@ -54,6 +61,7 @@ export class SavedEventComponent implements OnInit{
     }
   
   get participantsLabel() {
-    return `${this.event.minParticipants}/${this.event.maxParticipants}`;
+    const max = this.event.max_participants || this.event.maxParticipants || 0;
+    return `${this.actualParticipants}/${max}`;
   }
   }

@@ -833,6 +833,18 @@ export class SupabaseService {
     return activities || [];
   }
 
+  async getUpcomingSavedActivities() {
+    const all = await this.getSavedActivities();
+    const now = new Date();
+    return all.filter((e: any) => new Date(e.activity_date || e.date) > now);
+  }
+
+  async getPastSavedActivities() {
+    const all = await this.getSavedActivities();
+    const now = new Date();
+    return all.filter((e: any) => new Date(e.activity_date || e.date) < now);
+  }
+
   async getPopularLikedActivities() {
     const user = await this.getCurrentUser();
     if (!user) return [];
@@ -887,6 +899,20 @@ export class SupabaseService {
       console.error('Error updating star status:', error);
       throw error;
     }
+  }
+
+  async getParticipantCount(activityId: string): Promise<number> {
+    // Call the RPC function we just created in SQL
+    const { data, error } = await this._client.rpc('get_total_participant_count', {
+      activity_uuid: activityId
+    });
+
+    if (error) {
+      console.error('Error fetching participant count:', error);
+      return 0;
+    }
+    
+    return data || 0;
   }
 
   // NEW: Remove an activity from the saved list (Delete the swipe)
