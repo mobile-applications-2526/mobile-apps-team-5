@@ -39,3 +39,20 @@ ion-item {
   --inner-padding-start: 12px;
   --min-height: 62px;
 }
+
+ion-searchbar {
+  --background: var(--ion-color-medium);
+  --color: #222;
+  --placeholder-color: #777;
+  --icon-color: #555;
+  --clear-button-color: #555;
+
+  --border-radius: 12px;
+  --box-shadow: none;
+  max-width: 90%;
+
+  margin: auto;
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
