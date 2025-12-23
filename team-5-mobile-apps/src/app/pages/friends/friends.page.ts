@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonSegment, IonSegmentButton, IonIcon } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../../components/Header/header.componet';
@@ -25,10 +26,18 @@ export class FriendsPage {
     private friendsStore: FriendsStore,
     private chatsStore: ChatsStore,
     private suggestionsStore: SuggestionsStore,
-    private requestsStore: RequestsStore
+    private requestsStore: RequestsStore,
+    private route: ActivatedRoute
   ) { }
 
   ionViewWillEnter() {
+
+    const targetSegment = this.route.snapshot.queryParamMap.get('segment');
+    
+    
+    if (targetSegment === 'friends' || targetSegment === 'chats' || targetSegment === 'add') {
+      this.segment = targetSegment;
+    }
     this.friendsStore.loadFriends();
     this.chatsStore.loadChats();
     this.suggestionsStore.loadSuggestions();

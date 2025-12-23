@@ -110,7 +110,7 @@ export class ProfileComponent implements OnChanges {
   }
 
   goToFriendsPage() {
-    this.router.navigate(['/tabs/friends']);
+    this.router.navigate(['/tabs/friends'], { queryParams: { segment: 'friends' } });
   }
 
   async logout() {
