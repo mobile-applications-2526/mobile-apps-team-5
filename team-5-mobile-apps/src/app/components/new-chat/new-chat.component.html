@@ -1,11 +1,11 @@
-<ion-header>
+<ion-header class="keep-header" >
     <ion-toolbar>
         <ion-buttons slot="start">
-            <ion-button (click)="close()">Cancel</ion-button>
+            <ion-button (click)="close()" color="danger">Cancel</ion-button>
         </ion-buttons>
         <ion-title>New Chat</ion-title>
         <ion-buttons slot="end">
-            <ion-button (click)="createChat()" [disabled]="loading">Create</ion-button>
+            <ion-button (click)="createChat()" [disabled]="loading" color="success">Create</ion-button>
         </ion-buttons>
     </ion-toolbar>
 </ion-header>

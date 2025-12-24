@@ -1,10 +1,16 @@
 <div class="ion-page">
-    <ion-header>
+    <ion-header class="keep-header" [translucent]="true">
         <ion-toolbar>
             <ion-buttons slot="start">
-                <ion-back-button defaultHref="/tabs/friends"></ion-back-button>
+                <ion-button fill="clear" routerLink="/tabs/friends" aria-label="Back to chat lists">
+                    <ion-icon name="chevron-back"></ion-icon>
+                </ion-button>
+                <!-- <ion-back-button defaultHref="/tabs/friends"></ion-back-button> -->
             </ion-buttons>
+            
             <ion-title>{{ roomName }}</ion-title>
+
+            <ion-buttons slot="end"></ion-buttons>
         </ion-toolbar>
     </ion-header>
 

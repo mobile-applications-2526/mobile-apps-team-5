@@ -49,3 +49,27 @@ ion-tabs ion-header:not(.keep-header) {
 ion-tabs ion-header[collapse]:not(.keep-header) {
 	display: none !important;
 }
+
+
+ion-header.keep-header {
+  position: sticky;
+  top: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background:var(--ion-color-light);;
+  padding-top: 35px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  max-height: 100px;
+  text-align: center;
+}
+
+ion-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  width: max-content;
+}
+

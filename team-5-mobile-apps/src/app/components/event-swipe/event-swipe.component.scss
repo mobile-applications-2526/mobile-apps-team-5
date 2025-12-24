@@ -24,7 +24,7 @@
   height: 100%;
   background: #fff; /* Force White Background */
   border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -138,7 +138,7 @@
   border-radius: 50%;
   background: white;
   border: none;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
