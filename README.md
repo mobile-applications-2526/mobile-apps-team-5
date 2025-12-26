@@ -16,7 +16,7 @@ X-code/ android studio:
 - navigate to ./team-5-mobile-apps in terminal
 - Run the simulated device in xcode or android studio
 
-Ionic capacitor build:
+Run on device:
 - navigate to ./team-5-mobile-apps in terminal
 - For android: find the apk file at: ./team-5-mobile-apps/android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 - for iphone: Click on app in project navigator, select development team in signing and capabilities, connect phone to mac, click on build
@@ -32,7 +32,7 @@ X-code/ android studio:
 - npx cap open ios (or android)
 - Run the simulated device in xcode or android studio
 
-Ionic capacitor build:
+Run on device:
 - navigate to ./team-5-mobile-apps in terminal
 - ionic capacitor build ios (or android)
 - ionic cap copy (if web directory updated)
