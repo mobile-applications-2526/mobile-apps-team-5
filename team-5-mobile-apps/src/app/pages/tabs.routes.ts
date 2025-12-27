@@ -28,10 +28,10 @@ export const routes: Routes = [
         path: 'friends',
         loadComponent: () => import('./friends/friends.page').then((m) => m.FriendsPage),
       },
-      {
-        path: 'profile',
-        loadComponent: () => import('./profile/profile.page').then((m) => m.ProfilePage),
-      },
+      // {
+      //   path: 'profile',
+      //   loadComponent: () => import('./profile/profile.page').then((m) => m.ProfilePage),
+      // },
       {
         path: '',
         redirectTo: '/tabs/explore',
@@ -43,6 +43,11 @@ export const routes: Routes = [
     path: '',
     redirectTo: '/tabs/explore',
     pathMatch: 'full',
+  },
+  {
+    path: 'profile',
+    canActivate: [AuthGuardService],
+    loadComponent: () => import('./profile/profile.page').then((m) => m.ProfilePage),
   },
 ];
   
