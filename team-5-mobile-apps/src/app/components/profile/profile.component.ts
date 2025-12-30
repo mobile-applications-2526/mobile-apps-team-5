@@ -54,6 +54,7 @@ export class ProfileComponent implements OnChanges {
       this.loadFriendsCount();
       this.loadActivities();
       this.loadAllInterests(); // load all possible interests frmo DB
+      this.loadUserInterests();  // this user's selected interests (override form interests)
     }
   }
 
@@ -76,18 +77,31 @@ export class ProfileComponent implements OnChanges {
     try {
       const fv = this.form.value;
 
-      // 4. Send updates to Supabase
-      await this.supabase.updateProfileData({
-        full_name: fv.name || '',      // Map Form 'name' back to DB 'full_name'
-        bio: fv.bio || '',
-        // location: fv.location || '' // Uncomment if added to DB
-      });
+      // Selected interest NAMES from the form
+      const selectedNames: string[] = fv.interests || [];
+
+      // Map names → IDs using allInterests
+      const selectedIds = this.allInterests
+        .filter(i => selectedNames.includes(i.name))
+        .map(i => i.id);
+
+      // Send updates to Supabase (profile basic info + interests in parallel)
+      await Promise.all([
+        this.supabase.updateProfileData({
+          full_name: fv.name || '',
+          bio: fv.bio || '',
+          // location: fv.location || '' // Uncomment if added to DB
+        }),
+        this.supabase.updateUserInterests(selectedIds)
+      ]);
+
 
       // 5. Update local view immediately so user sees change without refresh
       this.user = { 
         ...this.user, 
         full_name: fv.name, 
-        bio: fv.bio 
+        bio: fv.bio ,
+        interests: selectedNames
       };
       
       this.edit = false;
@@ -137,6 +151,26 @@ export class ProfileComponent implements OnChanges {
       this.allInterests = [];
     } finally {
       this.loadingInterests = false;
+    }
+  }
+
+  //load interests for this user and put them on the user object for easy use
+  async loadUserInterests() {
+    try {
+      const list = await this.supabase.getUserInterests();
+      const names = list.map(i => i.name);
+
+      // save on user and form
+      this.user = {
+        ...this.user,
+        interests: names
+      };
+
+      this.form.patchValue({
+        interests: names
+      });
+    } catch (e) {
+      console.error('Error loading user interests', e);
     }
   }
 
