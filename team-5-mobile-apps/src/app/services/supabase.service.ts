@@ -1,13 +1,21 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient, AuthChangeEvent, Session, type SupportedStorage } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class SupabaseService {
   private _client: SupabaseClient;
   private _session$ = new BehaviorSubject<Session | null>(null);
   readonly session$ = this._session$.asObservable();
+
+  // Notify when the user's profile (including interests) is updated
+  private profileUpdatedSubject = new Subject<void>();
+  profileUpdated$ = this.profileUpdatedSubject.asObservable();
+
+  notifyProfileUpdated() {
+    this.profileUpdatedSubject.next();
+  }
 
   constructor() {
     if (!environment.SUPABASE_URL || !environment.SUPABASE_ANON_KEY) {
