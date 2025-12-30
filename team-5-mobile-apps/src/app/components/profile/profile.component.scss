@@ -1,13 +1,176 @@
-.profile-top { display:flex; align-items:center; gap:16px; padding:12px; }
-.big-avatar { --size:96px; }
-.initials { width:96px; height:96px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(142,76,255,0.12); color: #4a148c; font-size:28px; }
-.counts { display:flex; gap:12px; margin-left:8px; margin-top:6px }
-.count { background:#e9d9ff; padding:8px 12px; border-radius:8px; text-align:center; }
-.count .num { font-weight:700 }
-.profile-body { padding:12px; }
-.bio-box { padding:12px; border:1px solid #eee; border-radius:8px; color: #666 }
-.section { margin-top:14px }
-.chips ion-chip { margin-right:8px; background: rgba(142,76,255,0.12); color:#4a148c }
-.activity-card { background:#fff; padding:12px; border-radius:8px; margin-top:8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
-.meta { color:#666; font-size:0.9rem }
-.actions { display:flex; gap:8px; justify-content:flex-end; margin-top:8px }
+.profile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  
+  /* match profile-body horizontal layout */
+  padding: 12px 16px 0;
+  max-width: 480px;
+  margin: 16px auto 0;
+  margin-bottom: 24px;
+}
+
+.big-avatar {
+  --size: 96px;
+}
+
+.initials {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(142, 76, 255, 0.12);
+  color: #4a148c;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.counts {
+  display: flex;
+  gap: 12px;
+  margin-left: 8px;
+  margin-top: 6px;
+}
+
+.count {
+  background: #e9d9ff;
+  padding: 8px 12px;
+  border-radius: 999px;
+  text-align: center;
+}
+
+.count .num {
+  font-weight: 700;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+/* Main body layout */
+.profile-body {
+  padding: 12px 16px 32px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Name + location */
+.name {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 4px 0 0;
+}
+
+.location {
+  font-size: 14px;
+  color: #666;
+  margin-top: 2px;
+}
+
+/* Edit toggle button above sections */
+.edit-toggle {
+  margin-top: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.edit-toggle ion-button {
+  --border-radius: 999px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+/* Sections */
+.section {
+  margin-top: 14px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.section-header span {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+/* Small subtitle inside edit form */
+.section-subtitle {
+  font-size: 14px;
+  margin: 8px 0 6px;
+}
+
+/* Bio box */
+.bio-box {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #faf7ff;
+  border: 1px solid #eee3ff;
+  color: #555;
+  font-size: 14px;
+}
+
+/* Chips for interests / languages */
+.chips {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.chips ion-chip {
+  margin-right: 8px;
+  margin-bottom: 6px;
+  background: rgba(142, 76, 255, 0.12);
+  color: #4a148c;
+}
+
+/* Interest rows in edit mode */
+.interests-edit {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.interest-row {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: 40px;
+  font-size: 14px;
+}
+
+/* Reusable muted text (no interests, no activities) */
+.muted-text {
+  color: gray;
+  font-size: 0.9em;
+  margin-top: 4px;
+}
+
+/* Saved events spacing */
+.saved-event-wrapper {
+  margin-bottom: 10px;
+}
+
+/* Form actions */
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 15px;
+}
+
+/* Logout section spacing */
+.logout-section {
+  margin-top: 24px;
+  margin-bottom: 80px;
+}

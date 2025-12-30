@@ -6,6 +6,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
 import { SavedEventComponent } from '../saved-event/saved-event.component';
 
+
 @Component({
   selector: 'app-profile',
   standalone: true,
