@@ -21,6 +21,8 @@ export class ProfileComponent implements OnChanges {
   upcomingEvents: any[] = [];
   pastEvents: any[] = [];
   loadingActivities = true;
+  allInterests: { id: string; name: string }[] = []; //all interests available that the user can pick from
+  loadingInterests = false;
 
   edit = false;
   loading = false;
@@ -29,7 +31,8 @@ export class ProfileComponent implements OnChanges {
   form = this.fb.group({
     name: ['', Validators.required],
     location: [''], // NOTE: Ensure your DB 'profiles' table has a 'location' column if you want to save this!
-    bio: ['']
+    bio: [''],
+    interests: [[] as string[]]
   });
 
   constructor(
@@ -44,10 +47,13 @@ export class ProfileComponent implements OnChanges {
       this.form.patchValue({
         name: this.user.full_name || '', // Map DB 'full_name' to Form 'name'
         // location: this.user.location || '', // Uncomment if you added location to DB
-        bio: this.user.bio || ''
+        bio: this.user.bio || '',
+        // preselect current interests from user (array of strings)
+      interests: this.user.interests || []
       });
       this.loadFriendsCount();
       this.loadActivities();
+      this.loadAllInterests(); // load all possible interests frmo DB
     }
   }
 
@@ -57,7 +63,8 @@ export class ProfileComponent implements OnChanges {
     if (!this.edit && this.user) {
       this.form.patchValue({
         name: this.user.full_name,
-        bio: this.user.bio
+        bio: this.user.bio,
+        interests: this.user.interests || []
       });
     }
   }
@@ -119,6 +126,32 @@ export class ProfileComponent implements OnChanges {
 
   goToFriendsPage() {
     this.router.navigate(['/tabs/friends'], { queryParams: { segment: 'friends' } });
+  }
+
+  async loadAllInterests() {
+    this.loadingInterests = true;
+    try {
+      this.allInterests = await this.supabase.getAllInterests();
+    } catch (e) {
+      console.error('Error loading interests', e);
+      this.allInterests = [];
+    } finally {
+      this.loadingInterests = false;
+    }
+  }
+
+  onInterestToggle(name: string, checked: boolean) {
+    const current = (this.form.value.interests || []) as string[];
+
+    if (checked && !current.includes(name)) {
+      this.form.patchValue({
+        interests: [...current, name]
+      });
+    } else if (!checked && current.includes(name)) {
+      this.form.patchValue({
+        interests: current.filter(i => i !== name)
+      });
+    }
   }
 
   async loadActivities() {
