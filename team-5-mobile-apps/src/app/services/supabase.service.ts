@@ -155,7 +155,7 @@ export class SupabaseService {
     if (error) throw error;
   }
 
-
+  //get all interests from DB (not specific to user, just all available ones)
   async getAllInterests() {
     const { data, error } = await this._client
       .from('interests')
@@ -168,6 +168,81 @@ export class SupabaseService {
     }
     return data || [];
   }
+
+  //get interests that this user has
+  async getUserInterests(): Promise<{ id: string; name: string }[]> {
+    const user = await this.getCurrentUser();
+    if (!user) return [];
+
+    const { data, error } = await this._client
+      .from('user_interests')
+      .select(`
+        interest_id,
+        interests (
+          id,
+          name
+        )
+      `)
+      .eq('profile_id', user.id);
+
+    if (error) {
+      console.error('Error fetching user interests:', error);
+      return [];
+    }
+
+    // Flatten join: each row has `interests` object
+    const rows = (data || []) as any[];
+
+    return rows
+      .map(row => {
+        const interest = row.interests;
+        if (!interest) return null;
+        return {
+          id: interest.id,
+          name: interest.name
+        };
+      })
+      .filter((x): x is { id: string; name: string } => !!x);
+  }
+
+  //update a users interests (add / remove interests)
+  async updateUserInterests(interestIds: string[]): Promise<void> {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('Not logged in');
+
+    // Normalize input: unique, non-empty
+    const uniqueIds = Array.from(new Set(interestIds)).filter(id => !!id);
+
+    // 1. Delete existing links for this user (so just for ease delete all, and re-add all new ones, even if some get removed and then readded)
+    const { error: deleteError } = await this._client
+      .from('user_interests')
+      .delete()
+      .eq('profile_id', user.id);
+
+    if (deleteError) {
+      console.error('Error clearing user interests:', deleteError);
+      throw deleteError;
+    }
+
+    // 2. Insert new links
+    if (uniqueIds.length > 0) {
+      const inserts = uniqueIds.map(id => ({
+        profile_id: user.id,
+        interest_id: id
+      }));
+
+      const { error: insertError } = await this._client
+        .from('user_interests')
+        .insert(inserts);
+
+      if (insertError) {
+        console.error('Error inserting user interests:', insertError);
+        throw insertError;
+      }
+    }
+  }
+
+
 
   async uploadActivityImage(file: File): Promise<string> {
     if (!file) return '';
