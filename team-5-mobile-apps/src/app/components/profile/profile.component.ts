@@ -25,6 +25,7 @@ export class ProfileComponent implements OnChanges {
   loadingInterests = false;
 
   edit = false;
+  
   loading = false;
 
   // 2. Setup Form (Note: DB uses 'full_name', but we can keep 'name' in form if we map it)
@@ -94,6 +95,9 @@ export class ProfileComponent implements OnChanges {
         }),
         this.supabase.updateUserInterests(selectedIds)
       ]);
+
+      // broadcast that profile (including interests) changed
+    this.supabase.notifyProfileUpdated();
 
 
       // 5. Update local view immediately so user sees change without refresh

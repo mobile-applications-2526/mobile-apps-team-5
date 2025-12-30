@@ -14,9 +14,23 @@
   </ion-header>
   <app-header name="Explore"></app-header>
 
+    <ion-toolbar>
+      <ion-buttons slot="end">
+        <ion-button 
+          (click)="toggleInterestFilter()" 
+          [color]="filterByInterests ? 'primary' : 'gray'"
+          fill="outline">
+          
+          <ion-icon name="funnel" slot="start"></ion-icon>
+          <span *ngIf="!filterByInterests">Filter by interests</span>
+          <span *ngIf="filterByInterests">Filtering by interests</span>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+
     <app-event-swipe
     *ngIf="!loading"
-    [events]="activities"
+    [events]="visibleActivities"
     (swiped)="handleSwipe($event)">
   </app-event-swipe>
 
