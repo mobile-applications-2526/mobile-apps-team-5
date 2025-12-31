@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient, AuthChangeEvent, Session, type SupportedStorage } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class SupabaseService {
@@ -9,15 +9,19 @@ export class SupabaseService {
   private _session$ = new BehaviorSubject<Session | null>(null);
   readonly session$ = this._session$.asObservable();
 
+  private profileUpdatedSubject = new Subject<void>();
+  profileUpdated$ = this.profileUpdatedSubject.asObservable();
+
+  notifyProfileUpdated() {
+    this.profileUpdatedSubject.next();
+  }
+
   constructor() {
     if (!environment.SUPABASE_URL || !environment.SUPABASE_ANON_KEY) {
       console.warn('Supabase env not set: please add SUPABASE_URL and SUPABASE_ANON_KEY');
     }
-    // Try to use Capacitor Preferences for mobile (if available), else fall back to localStorage
     let storage: SupportedStorage | undefined;
     try {
-      // Dynamic import so web works without Capacitor
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const prefs = require('@capacitor/preferences');
       const Preferences = prefs.Preferences;
       storage = {
@@ -33,7 +37,6 @@ export class SupabaseService {
         },
       } as SupportedStorage;
     } catch {
-      // Fallback: browser localStorage
       storage = typeof window !== 'undefined' ? window.localStorage : undefined;
     }
 
@@ -47,7 +50,6 @@ export class SupabaseService {
       },
     });
 
-    // Initialize current session and listen for changes
     this._client.auth.getSession().then(({ data }) => {
       this._session$.next(data.session ?? null);
     });
@@ -60,21 +62,14 @@ export class SupabaseService {
     return this._client;
   }
 
-  // Auth helpers
   signIn(email: string, password: string) {
     return this._client.auth.signInWithPassword({ email, password });
   }
 
-  // signUp(email: string, password: string) {
-  //   return this._client.auth.signUp({ email, password });
-  // }
-
-  // UPDATED: Creates the Auth user AND the initial Database Profile
   async signUp(email: string, password: string) {
     const response = await this._client.auth.signUp({ email, password });
     if (response.error) throw response.error;
 
-    // Try to create initial profile, but don't fail if it doesn't work (we fix it in Setup)
     if (response.data.user) {
       const tempUsername = email.split('@')[0] + Math.floor(Math.random() * 1000);
       await this._client.from('profiles').insert({
@@ -94,13 +89,11 @@ export class SupabaseService {
 
 
 
-  //-------helper get current logged-in user
   async getCurrentUser() {
     const { data } = await this._client.auth.getUser();
     return data.user;
   }
 
-  // Helper to check if profile exists and is complete
   async getProfile() {
     const user = await this.getCurrentUser();
     if (!user) return null;
@@ -118,7 +111,6 @@ export class SupabaseService {
     return data;
   }
 
-  //to confirm the profile details
   async completeProfile(firstName: string, lastName: string, bio: string) {
     const user = await this.getCurrentUser();
 
@@ -126,23 +118,21 @@ export class SupabaseService {
       throw new Error('User not logged in');
     }
 
-    // Combine inputs because your DB uses 'full_name'
     const fullName = `${firstName} ${lastName}`.trim();
     const randomUsername = firstName.toLowerCase().replace(/\s/g, '') + Math.floor(Math.random() * 10000);
     const { error } = await this._client
       .from('profiles')
       .upsert({
-        id: user.id, // This links it to the user
+        id: user.id,
         full_name: fullName,
         bio: bio,
         username: randomUsername
-      }, { onConflict: 'id' }); // If ID exists, update it. If not, insert.
+      }, { onConflict: 'id' });
 
     if (error) throw error;
   }
 
 
-  // Update existing profile
   async updateProfileData(profileData: { full_name?: string; bio?: string; location?: string }) {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not logged in');
@@ -154,7 +144,6 @@ export class SupabaseService {
 
     if (error) throw error;
   }
-
 
   async getAllInterests() {
     const { data, error } = await this._client
@@ -169,13 +158,81 @@ export class SupabaseService {
     return data || [];
   }
 
+  async getUserInterests(): Promise<{ id: string; name: string }[]> {
+    const user = await this.getCurrentUser();
+    if (!user) return [];
+
+    const { data, error } = await this._client
+      .from('user_interests')
+      .select(`
+        interest_id,
+        interests (
+          id,
+          name
+        )
+      `)
+      .eq('profile_id', user.id);
+
+    if (error) {
+      console.error('Error fetching user interests:', error);
+      return [];
+    }
+
+    const rows = (data || []) as any[];
+
+    return rows
+      .map(row => {
+        const interest = row.interests;
+        if (!interest) return null;
+        return {
+          id: interest.id,
+          name: interest.name
+        };
+      })
+      .filter((x): x is { id: string; name: string } => !!x);
+  }
+
+  async updateUserInterests(interestIds: string[]): Promise<void> {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('Not logged in');
+
+    const uniqueIds = Array.from(new Set(interestIds)).filter(id => !!id);
+
+    const { error: deleteError } = await this._client
+      .from('user_interests')
+      .delete()
+      .eq('profile_id', user.id);
+
+    if (deleteError) {
+      console.error('Error clearing user interests:', deleteError);
+      throw deleteError;
+    }
+
+    if (uniqueIds.length > 0) {
+      const inserts = uniqueIds.map(id => ({
+        profile_id: user.id,
+        interest_id: id
+      }));
+
+      const { error: insertError } = await this._client
+        .from('user_interests')
+        .insert(inserts);
+
+      if (insertError) {
+        console.error('Error inserting user interests:', insertError);
+        throw insertError;
+      }
+    }
+  }
+
+
+
   async uploadActivityImage(file: File): Promise<string> {
     if (!file) return '';
 
     const filePath = `public/${Date.now()}-${file.name}`;
     const bucket = 'activity_images'; //bucket name in storage is the same 
 
-    // Upload the file
     const { error: uploadError } = await this._client.storage
       .from(bucket)
       .upload(filePath, file, {
@@ -188,7 +245,6 @@ export class SupabaseService {
       throw new Error('Image upload failed: ' + uploadError.message);
     }
 
-    // Get the public URL to save to the database
     const { data } = this._client.storage.from(bucket).getPublicUrl(filePath);
 
     return data.publicUrl;
@@ -200,7 +256,7 @@ export class SupabaseService {
 
     let imageUrl = '';
 
-    if (formValues.image instanceof File) { // is image a fileObject?
+    if (formValues.image instanceof File) {
       imageUrl = await this.uploadActivityImage(formValues.image);
     }
     const newActivity = {
@@ -267,8 +323,6 @@ export class SupabaseService {
 
 
     if (swipedIds.length > 0) {
-      // Supabase .not() with 'in' operator requires manual formatting of the tuple string
-      // e.g. .not('id', 'in', '(uuid1,uuid2)')
       const filterString = `(${swipedIds.join(',')})`;
       query = query.not('id', 'in', filterString);
     }
@@ -286,7 +340,6 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    // 1. Get IDs of activities I liked
     const { data: swipes, error: swipeError } = await this._client
       .from('activity_swipes')
       .select('swipe')
@@ -301,10 +354,9 @@ export class SupabaseService {
     if (!swipes || swipes.length === 0) return [];
     const likedIds = swipes.map((s: any) => s.swipe);
 
-    // 2. Fetch activity details
     const { data: activities, error: actError } = await this._client
       .from('activities')
-      .select('*, interest (name)') // Join interest for category name if needed
+      .select('*, interest (name)')
       .in('id', likedIds);
 
     if (actError) {
@@ -312,7 +364,6 @@ export class SupabaseService {
       return [];
     }
 
-    // Map to match internal expectations if necessary, or return as is
     return activities || [];
   }
 
@@ -326,7 +377,6 @@ export class SupabaseService {
     });
 
     if (error) {
-      // It's okay to fail silently and just show 0
       console.error('Error fetching mutual friends:', error);
       return 0;
     }
@@ -337,7 +387,6 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not logged in');
 
-    //Insert the swipe with the User ID
     const { error } = await this._client
       .from('activity_swipes')
       .insert({
@@ -354,35 +403,29 @@ export class SupabaseService {
     }
   }
 
-  // Data helpers
   from(table: string) {
     return this._client.from(table);
   }
-  // Suggestions
   async getAllProfiles() {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    // 1. Get IDs of everyone I have a relationship with (friends, pending, requested)
-    // Case A: I am user_id_1
     const { data: rel1 } = await this._client
       .from('friendships')
       .select('user_id_2')
       .eq('user_id_1', user.id);
 
-    // Case B: I am user_id_2
     const { data: rel2 } = await this._client
       .from('friendships')
       .select('user_id_1')
       .eq('user_id_2', user.id);
 
     const excludedIds = new Set<string>();
-    excludedIds.add(user.id); // Exclude self
+    excludedIds.add(user.id);
 
     rel1?.forEach((r: any) => excludedIds.add(r.user_id_2));
     rel2?.forEach((r: any) => excludedIds.add(r.user_id_1));
 
-    // 2. Fetch profiles NOT in the excluded list
     const { data, error } = await this._client
       .from('profiles')
       .select('*')
@@ -400,11 +443,10 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not logged in');
 
-    // Insert new friendship with status 'pending'
     const { error } = await this._client
       .from('friendships')
       .insert({
-        user_id_1: user.id, // Current user is initiator
+        user_id_1: user.id,
         user_id_2: targetUserId,
         status: 'pending'
       });
@@ -419,10 +461,9 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    // Fetch pending requests where I am the target (user_id_2)
     const { data, error } = await this._client
       .from('friendships')
-      .select('id, user_id_1, status, created_at') // select the friendship ID and the sender's ID
+      .select('id, user_id_1, status, created_at')
       .eq('user_id_2', user.id)
       .eq('status', 'pending');
 
@@ -433,7 +474,6 @@ export class SupabaseService {
 
     if (!data || data.length === 0) return [];
 
-    // Get sender profiles
     const senderIds = data.map((r: any) => r.user_id_1);
     const { data: profiles, error: profileError } = await this._client
       .from('profiles')
@@ -445,7 +485,6 @@ export class SupabaseService {
       return [];
     }
 
-    // Map profiles back to requests
     const profileMap = new Map(profiles?.map((p: any) => [p.id, p]));
 
     return data.map((r: any) => ({
@@ -470,13 +509,10 @@ export class SupabaseService {
     return this._client.rpc(fn, args);
   }
 
-  // Friendships
   async getFriends() {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    // Fetch friendships where status is 'accepted'
-    // Direction 1: I am user_id_1, friend is user_id_2
     const { data: f1, error: e1 } = await this._client
       .from('friendships')
       .select('user_id_2')
@@ -485,7 +521,6 @@ export class SupabaseService {
 
     if (e1) console.error('Error fetching friendships (1):', e1);
 
-    // Direction 2: I am user_id_2, friend is user_id_1
     const { data: f2, error: e2 } = await this._client
       .from('friendships')
       .select('user_id_1')
@@ -494,14 +529,12 @@ export class SupabaseService {
 
     if (e2) console.error('Error fetching friendships (2):', e2);
 
-    // Collect all friend IDs
     const friendIds = new Set<string>();
     f1?.forEach((f: any) => friendIds.add(f.user_id_2));
     f2?.forEach((f: any) => friendIds.add(f.user_id_1));
 
     if (friendIds.size === 0) return [];
 
-    // Fetch profiles
     const { data: profiles, error } = await this._client
       .from('profiles')
       .select('*')
@@ -528,12 +561,10 @@ export class SupabaseService {
     return count || 0;
   }
 
-  // Chat
   async getChatRooms() {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    // 1. Get IDs of rooms I am in
     const { data: myParticipants, error: partError } = await this._client
       .from('chat_room_participants')
       .select('room_id')
@@ -544,7 +575,6 @@ export class SupabaseService {
       return [];
     }
 
-    // Explicitly cast to any array to avoid TS errors if types are loose
     const participants = myParticipants as any[] || [];
     const roomIds = participants.map(p => p.room_id);
 
@@ -552,7 +582,6 @@ export class SupabaseService {
       return [];
     }
 
-    // 2. Fetch the rooms, AND the *other* participants for those rooms
     const { data: roomsData, error } = await this._client
       .from('chat_rooms')
       .select(`
@@ -570,16 +599,13 @@ export class SupabaseService {
 
     const rooms = roomsData as any[] || [];
 
-    // 3. For each room, determine the "other" user and fetch details
     const allParticipantIds = new Set<string>();
     rooms.forEach((room) => {
-      // room.chat_room_participants is an array of objects
       if (Array.isArray(room.chat_room_participants)) {
         room.chat_room_participants.forEach((p: any) => allParticipantIds.add(p.participant));
       }
     });
 
-    // fetch profiles
     const { data: profiles } = await this._client
       .from('profiles')
       .select('*')
@@ -587,12 +613,10 @@ export class SupabaseService {
 
     const profileMap = new Map((profiles as any[])?.map(p => [p.id, p]));
 
-    // Check last messages for each room
     const enrichedRooms = await Promise.all(rooms.map(async (room) => {
       let name = 'Unknown Chat';
       let avatarUrl = undefined;
 
-      // Logic for 1-on-1: find the participant that isn't me
       const participants = room.chat_room_participants as any[];
       const otherPart = participants.find((p) => p.participant !== user.id);
 
@@ -604,7 +628,6 @@ export class SupabaseService {
         }
       }
 
-      // Get last message
       const { data: lastMsg } = await this._client
         .from('chat_messages')
         .select('*')
@@ -659,8 +682,6 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not logged in');
 
-    // 1. Check if a direct chat already exists
-    // Get all rooms I am in
     const { data: myRooms } = await this._client
       .from('chat_room_participants')
       .select('room_id')
@@ -669,14 +690,12 @@ export class SupabaseService {
     const myRoomIds = myRooms?.map((r: any) => r.room_id) || [];
 
     if (myRoomIds.length > 0) {
-      // Check which of these rooms the friend is also in
       const { data: commonRooms } = await this._client
         .from('chat_room_participants')
         .select('room_id')
         .in('room_id', myRoomIds)
         .eq('participant', friendId);
 
-      // If we find a common room, we need to check if it's a direct chat (only 2 people)
       if (commonRooms && commonRooms.length > 0) {
         for (const room of commonRooms) {
           const { count } = await this._client
@@ -685,13 +704,12 @@ export class SupabaseService {
             .eq('room_id', room.room_id);
 
           if (count === 2) {
-            return room.room_id; // Found existing direct chat
+            return room.room_id;
           }
         }
       }
     }
 
-    // 2. No existing room found, create a new one
     const { data: newRoom, error: roomError } = await this._client
       .from('chat_rooms')
       .insert({
@@ -703,7 +721,6 @@ export class SupabaseService {
 
     if (roomError) throw roomError;
 
-    // 3. Add participants
     const { error: partError } = await this._client
       .from('chat_room_participants')
       .insert([
@@ -720,7 +737,6 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not logged in');
 
-    // 1. Create Room
     const { data: newRoom, error: roomError } = await this._client
       .from('chat_rooms')
       .insert({
@@ -732,7 +748,6 @@ export class SupabaseService {
 
     if (roomError) throw roomError;
 
-    // 2. Add all participants (including self)
     const allParticipants = [user.id, ...participantIds];
     const participantsData = allParticipants.map(uid => ({
       room_id: newRoom.id,
@@ -763,7 +778,6 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    // 1. Get my rooms and my last_read_at
     const { data: myPart } = await this._client
       .from('chat_room_participants')
       .select('room_id, last_read_at')
@@ -773,7 +787,6 @@ export class SupabaseService {
 
     const updates = [];
 
-    // 2. For each room, check if there are newer messages
     for (const p of myPart) {
       const lastRead = p.last_read_at || '1970-01-01T00:00:00Z';
 
@@ -782,12 +795,11 @@ export class SupabaseService {
         .select('*', { count: 'exact', head: true })
         .eq('room', p.room_id)
         .gt('created_at', lastRead)
-        .neq('sender', user.id); // Don't count my own messages
+        .neq('sender', user.id);
 
       if (error) console.error('Error counting messages', error);
 
       if (count && count > 0) {
-        // Fetch room details for name
         const { data: room } = await this._client
           .from('chat_rooms')
           .select('name')
@@ -809,7 +821,6 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    // 1. Get activities I liked
     const { data: swipes } = await this._client
       .from('activity_swipes')
       .select('swipe')
@@ -819,7 +830,6 @@ export class SupabaseService {
     if (!swipes || swipes.length === 0) return [];
     const ids = swipes.map((s: any) => s.swipe);
 
-    // 2. Filter for those starting within 24h (and in future)
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
@@ -849,7 +859,6 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    // 1. Get activities I liked
     const { data: swipes } = await this._client
       .from('activity_swipes')
       .select('swipe')
@@ -859,7 +868,6 @@ export class SupabaseService {
     if (!swipes || swipes.length === 0) return [];
     const ids = swipes.map((s: any) => s.swipe);
 
-    // 2. Get activities details
     const { data: activities } = await this._client
       .from('activities')
       .select('*')
@@ -869,7 +877,6 @@ export class SupabaseService {
 
     const popular = [];
 
-    // 3. Check participant count for each
     for (const act of activities) {
       const { count } = await this._client
         .from('activity_swipes')
@@ -902,7 +909,6 @@ export class SupabaseService {
   }
 
   async getParticipantCount(activityId: string): Promise<number> {
-    // Call the RPC function we just created in SQL
     const { data, error } = await this._client.rpc('get_total_participant_count', {
       activity_uuid: activityId
     });
@@ -915,7 +921,6 @@ export class SupabaseService {
     return data || 0;
   }
 
-  // NEW: Remove an activity from the saved list (Delete the swipe)
   async removeSavedActivity(activityId: string) {
     const user = await this.getCurrentUser();
     if (!user) return;

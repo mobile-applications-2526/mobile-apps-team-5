@@ -14,8 +14,6 @@ export class SavedStore {
   async load() {
     try {
       const activities = await this.supabase.getSavedActivities();
-      // Map database structure to UI model if needed, or just use as is if compatible
-      // Assuming UI uses similar fields or we map them:
       const saved = activities.map((a: any) => ({
         id: a.id,
         name: a.name,
@@ -26,8 +24,8 @@ export class SavedStore {
         date: a.activity_date,
         image: a.image_url || 'https://picsum.photos/seed/default/400/300',
         location: a.location,
-        friendsInterested: 0, // Not yet fully implemented, could be future task
-        starred: true, // By definition, it's liked
+        friendsInterested: 0,
+        starred: true,
       }));
       this._saved.next(saved);
     } catch (e) {
@@ -35,7 +33,6 @@ export class SavedStore {
     }
   }
 
-  // Reloads to ensure fresh data
   refresh() {
     this.load();
   }
@@ -43,7 +40,6 @@ export class SavedStore {
   async remove(id: string) {
     try {
       await this.supabase.unrecordSwipe(id);
-      // Optimistic update
       this._saved.next(this._saved.value.filter(e => e.id !== id));
     } catch (e) {
       console.error('Failed to remove saved item', e);

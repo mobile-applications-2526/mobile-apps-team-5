@@ -27,7 +27,7 @@ export class ChatDetailPage implements OnInit {
     @ViewChild(IonContent) content!: IonContent;
 
     roomId: string = '';
-    messages: any[] = []; // Type should be defined
+    messages: any[] = [];
     newMessage = '';
     roomName = 'Chat';
 
@@ -49,11 +49,6 @@ export class ChatDetailPage implements OnInit {
             await this.supabase.markRoomRead(this.roomId);
             this.messages = await this.supabase.getMessages(this.roomId);
             this.scrollToBottom();
-
-            // Determine room name? We might need a method to get single room details or infer from messages?
-            // For now, simpler: SupabaseService.getChatRooms() fetches all rooms. 
-            // We could filter from that cache if we had a store for it, or fetch single.
-            // Let's just fetch messages for now.
         }
     }
 
@@ -64,12 +59,11 @@ export class ChatDetailPage implements OnInit {
 
         try {
             await this.supabase.sendMessage(this.roomId, msg);
-            // Optimistic update or refetch
             this.messages = await this.supabase.getMessages(this.roomId);
             this.scrollToBottom();
         } catch (error) {
             console.error('Failed to send', error);
-            this.newMessage = msg; // Restore
+            this.newMessage = msg;
         }
     }
 

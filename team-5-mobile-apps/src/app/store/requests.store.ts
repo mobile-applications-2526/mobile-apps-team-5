@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { SupabaseService } from '../services/supabase.service';
 
 export interface FriendRequest {
-    id: string; // The friendship ID
+    id: string;
     senderName: string;
     senderAvatar?: string;
     timestamp: string;
@@ -33,7 +33,6 @@ export class RequestsStore {
 
     async acceptRequest(id: string) {
         await this.supabase.acceptFriendRequest(id);
-        // Remove from local state
         this._requests$.next(this.snapshot.filter(r => r.id !== id));
     }
 }

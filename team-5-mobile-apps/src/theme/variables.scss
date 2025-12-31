@@ -1,6 +1,3 @@
-/* For information on how to create your own theme, please see:
-   http://ionicframework.com/docs/theming/ */
-
 :root {
 
   --ion-color-primary: #F5C02A;
@@ -42,7 +39,6 @@
   --ion-color-white: #ffffff;
 }
 
-/* Generate CSS classes for the new quaternary color */
 .ion-color-quaternary {
   --ion-color-base: var(--ion-color-quaternary);
   --ion-color-base-rgb: var(--ion-color-quaternary-rgb);

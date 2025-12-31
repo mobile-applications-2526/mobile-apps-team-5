@@ -13,13 +13,14 @@ import {
   IonInput, 
   IonTextarea, 
   IonButton,
-  IonSpinner
+  IonSpinner,
+  IonCheckbox,
+  IonSkeletonText
 } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-profile-setup',
   templateUrl: './profile-setup.page.html',
-//   styleUrls: ['./profile-setup.page.scss'],
   standalone: true,
   imports: [
     CommonModule, 
@@ -33,7 +34,9 @@ import {
     IonInput, 
     IonTextarea, 
     IonButton,
-    IonSpinner
+    IonSpinner,
+    IonCheckbox,
+    IonSkeletonText
   ]
 })
 export class ProfileSetupPage implements OnInit {
@@ -44,12 +47,39 @@ export class ProfileSetupPage implements OnInit {
   
   loading: boolean = false;
 
+  allInterests: { id: string; name: string }[] = [];
+  loadingInterests: boolean = false;
+  selectedInterests: string[] = [];
+
   constructor(
     private supabase: SupabaseService, 
     private router: Router
   ) { }
 
   ngOnInit() {
+    this.loadAllInterests();
+  }
+
+  async loadAllInterests() {
+    this.loadingInterests = true;
+    try {
+      this.allInterests = await this.supabase.getAllInterests();
+    } catch (e) {
+      console.error('Error loading interests in setup page', e);
+      this.allInterests = [];
+    } finally {
+      this.loadingInterests = false;
+    }
+  }
+
+  onInterestToggle(name: string, checked: boolean) {
+    const current = this.selectedInterests;
+
+    if (checked && !current.includes(name)) {
+      this.selectedInterests = [...current, name];
+    } else if (!checked && current.includes(name)) {
+      this.selectedInterests = current.filter(i => i !== name);
+    }
   }
 
   async onComplete() {
@@ -62,15 +92,22 @@ export class ProfileSetupPage implements OnInit {
     this.loading = true;
 
     try {
-      // Save data to Supabase
-      
       await this.supabase.completeProfile(
         this.firstName, 
         this.lastName, 
         this.bio
       );
 
-      //  Go to the main app after completion.
+      const selectedIds = this.allInterests
+        .filter(i => this.selectedInterests.includes(i.name))
+        .map(i => i.id);
+
+      if (selectedIds.length > 0) {
+        await this.supabase.updateUserInterests(selectedIds);
+      } else {
+        await this.supabase.updateUserInterests([]);
+      }
+
       this.router.navigateByUrl('/tabs/explore', { replaceUrl: true });
 
     } catch (error: any) {

@@ -6,6 +6,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
 import { SavedEventComponent } from '../saved-event/saved-event.component';
 
+
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -14,22 +15,24 @@ import { SavedEventComponent } from '../saved-event/saved-event.component';
   styleUrls: ['./profile.component.scss'],
 })
 export class ProfileComponent implements OnChanges {
-  
-  // 1. Receive data from the Parent Page
+
   @Input() user: any = null;
 
   upcomingEvents: any[] = [];
   pastEvents: any[] = [];
   loadingActivities = true;
+  allInterests: { id: string; name: string }[] = []; 
+  loadingInterests = false;
 
   edit = false;
+  
   loading = false;
 
-  // 2. Setup Form (Note: DB uses 'full_name', but we can keep 'name' in form if we map it)
   form = this.fb.group({
     name: ['', Validators.required],
-    location: [''], // NOTE: Ensure your DB 'profiles' table has a 'location' column if you want to save this!
-    bio: ['']
+    location: [''], 
+    bio: [''],
+    interests: [[] as string[]]
   });
 
   constructor(
@@ -38,26 +41,27 @@ export class ProfileComponent implements OnChanges {
     private router: Router
   ) {}
 
-  // 3. Listen for changes: When Supabase data arrives, fill the form
   ngOnChanges(changes: SimpleChanges) {
     if (changes['user'] && this.user) {
       this.form.patchValue({
-        name: this.user.full_name || '', // Map DB 'full_name' to Form 'name'
-        // location: this.user.location || '', // Uncomment if you added location to DB
-        bio: this.user.bio || ''
+        name: this.user.full_name || '', 
+        bio: this.user.bio || '',
+      interests: this.user.interests || []
       });
       this.loadFriendsCount();
       this.loadActivities();
+      this.loadAllInterests(); 
+      this.loadUserInterests(); 
     }
   }
 
   toggleEdit() {
     this.edit = !this.edit;
-    // Reset form to current user data if cancelling
     if (!this.edit && this.user) {
       this.form.patchValue({
         name: this.user.full_name,
-        bio: this.user.bio
+        bio: this.user.bio,
+        interests: this.user.interests || []
       });
     }
   }
@@ -69,18 +73,28 @@ export class ProfileComponent implements OnChanges {
     try {
       const fv = this.form.value;
 
-      // 4. Send updates to Supabase
-      await this.supabase.updateProfileData({
-        full_name: fv.name || '',      // Map Form 'name' back to DB 'full_name'
-        bio: fv.bio || '',
-        // location: fv.location || '' // Uncomment if added to DB
-      });
+      const selectedNames: string[] = fv.interests || [];
 
-      // 5. Update local view immediately so user sees change without refresh
+      const selectedIds = this.allInterests
+        .filter(i => selectedNames.includes(i.name))
+        .map(i => i.id);
+
+      await Promise.all([
+        this.supabase.updateProfileData({
+          full_name: fv.name || '',
+          bio: fv.bio || '',
+        }),
+        this.supabase.updateUserInterests(selectedIds)
+      ]);
+
+    this.supabase.notifyProfileUpdated();
+
+
       this.user = { 
         ...this.user, 
         full_name: fv.name, 
-        bio: fv.bio 
+        bio: fv.bio ,
+        interests: selectedNames
       };
       
       this.edit = false;
@@ -106,13 +120,11 @@ export class ProfileComponent implements OnChanges {
 
   
 
-  // Helper to get initials from the Real Data
   getInitials() {
-    const name = this.user?.full_name || ''; // Use full_name from DB
+    const name = this.user?.full_name || ''; 
     const parts = name.trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return '?';
     
-    // Get first letter of first name + first letter of last name
     const letters = parts.map((s: string) => s[0]).join('');
     return letters.slice(0, 2).toUpperCase();
   }
@@ -121,10 +133,53 @@ export class ProfileComponent implements OnChanges {
     this.router.navigate(['/tabs/friends'], { queryParams: { segment: 'friends' } });
   }
 
+  async loadAllInterests() {
+    this.loadingInterests = true;
+    try {
+      this.allInterests = await this.supabase.getAllInterests();
+    } catch (e) {
+      console.error('Error loading interests', e);
+      this.allInterests = [];
+    } finally {
+      this.loadingInterests = false;
+    }
+  }
+
+  async loadUserInterests() {
+    try {
+      const list = await this.supabase.getUserInterests();
+      const names = list.map(i => i.name);
+
+      this.user = {
+        ...this.user,
+        interests: names
+      };
+
+      this.form.patchValue({
+        interests: names
+      });
+    } catch (e) {
+      console.error('Error loading user interests', e);
+    }
+  }
+
+  onInterestToggle(name: string, checked: boolean) {
+    const current = (this.form.value.interests || []) as string[];
+
+    if (checked && !current.includes(name)) {
+      this.form.patchValue({
+        interests: [...current, name]
+      });
+    } else if (!checked && current.includes(name)) {
+      this.form.patchValue({
+        interests: current.filter(i => i !== name)
+      });
+    }
+  }
+
   async loadActivities() {
     this.loadingActivities = true;
     try {
-      // Promise.all runs them at the same time for speed
       const [upcoming, past] = await Promise.all([
         this.supabase.getUpcomingSavedActivities(),
         this.supabase.getPastSavedActivities()
@@ -147,7 +202,6 @@ export class ProfileComponent implements OnChanges {
     try {
       await this.supabase.signOut();
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.error('Logout failed', e);
     }
     this.router.navigateByUrl('/login');

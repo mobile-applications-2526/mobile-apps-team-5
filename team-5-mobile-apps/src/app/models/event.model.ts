@@ -5,8 +5,8 @@ export interface EventModel {
   description: string;
   minParticipants: number;
   maxParticipants: number;
-  date: string; // ISO date string
-  image: string; // image url
+  date: string; 
+  image: string; 
   location?: string;
   friendsInterested?: number;
   starred?: boolean;

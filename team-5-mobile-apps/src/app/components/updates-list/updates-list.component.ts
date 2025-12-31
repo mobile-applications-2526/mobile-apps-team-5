@@ -38,15 +38,8 @@ export class UpdatesListComponent implements OnInit, OnDestroy {
     if (item.type === 'MESSAGE') {
       this.router.navigate(['/chats', item.data.roomId]);
     } else if (item.type === 'FRIEND_REQUEST') {
-      // Go to friends page add tab?
-      // Actually we implemented the request list in the "Add" tab of friends page.
-      // So redirect there.
       this.router.navigate(['/tabs/friends'], { queryParams: { segment: 'add' } });
     } else if (item.type === 'EVENT_REMINDER' || item.type === 'EVENT_POPULAR') {
-      // Go to explore or saved? 
-      // Ideally an activity detail page, but we don't have one?
-      // For now, go to Saved page as a fallback or just do nothing.
-      // Assuming 'Saved' page shows liked events.
       this.router.navigate(['/tabs/saved']);
     }
   }

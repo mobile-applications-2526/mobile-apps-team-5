@@ -29,6 +29,34 @@
         placeholder="Tell us a little about yourself...">
       </ion-textarea>
     </ion-item>
+
+    <!-- interests section -->
+    <div style="margin-top: 24px;">
+      <h3 style="margin-bottom: 8px;">Interests</h3>
+
+      <!-- Loading state -->
+      <div *ngIf="loadingInterests">
+        <ion-skeleton-text
+          animated
+          style="width: 100%; height: 40px; margin-bottom: 8px;">
+        </ion-skeleton-text>
+      </div>
+
+      <div *ngIf="!loadingInterests">
+        <ion-item lines="none" *ngFor="let interest of allInterests">
+          <ion-checkbox
+            slot="start"
+            [checked]="selectedInterests.includes(interest.name)"
+            (ionChange)="onInterestToggle(interest.name, $event.detail.checked)">
+          </ion-checkbox>
+          <ion-label>{{ interest.name }}</ion-label>
+        </ion-item>
+
+        <p *ngIf="allInterests.length === 0" style="color: gray; font-size: 0.9em; margin-top: 4px;">
+          No interests available yet.
+        </p>
+      </div>
+    </div>
   
     <ion-button 
       expand="block" 
