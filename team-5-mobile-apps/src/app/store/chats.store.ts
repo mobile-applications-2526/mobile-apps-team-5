@@ -6,7 +6,7 @@ export interface ChatItem {
   id: string;
   name: string;
   lastMessage: string;
-  time: string; // '11:53', 'Yesterday', etc.
+  time: string;
   unread?: number;
   avatarUrl?: string;
 }
@@ -24,7 +24,6 @@ export class ChatsStore {
 
   async loadChats() {
     const rooms = await this.supabase.getChatRooms();
-    // getChatRooms returns objects that match ChatItem closely but might need mapping
     const chats: ChatItem[] = rooms.map((r: any) => ({
       id: r.id,
       name: r.name,

@@ -41,7 +41,6 @@ export class SuggestionsStore {
 
   async sendRequest(userId: string) {
     await this.supabase.sendFriendRequest(userId);
-    // Optimistically remove from suggestions
     this.remove(userId);
   }
 

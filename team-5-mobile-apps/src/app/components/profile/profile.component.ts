@@ -15,24 +15,22 @@ import { SavedEventComponent } from '../saved-event/saved-event.component';
   styleUrls: ['./profile.component.scss'],
 })
 export class ProfileComponent implements OnChanges {
-  
-  // 1. Receive data from the Parent Page
+
   @Input() user: any = null;
 
   upcomingEvents: any[] = [];
   pastEvents: any[] = [];
   loadingActivities = true;
-  allInterests: { id: string; name: string }[] = []; //all interests available that the user can pick from
+  allInterests: { id: string; name: string }[] = []; 
   loadingInterests = false;
 
   edit = false;
   
   loading = false;
 
-  // 2. Setup Form (Note: DB uses 'full_name', but we can keep 'name' in form if we map it)
   form = this.fb.group({
     name: ['', Validators.required],
-    location: [''], // NOTE: Ensure your DB 'profiles' table has a 'location' column if you want to save this!
+    location: [''], 
     bio: [''],
     interests: [[] as string[]]
   });
@@ -43,26 +41,22 @@ export class ProfileComponent implements OnChanges {
     private router: Router
   ) {}
 
-  // 3. Listen for changes: When Supabase data arrives, fill the form
   ngOnChanges(changes: SimpleChanges) {
     if (changes['user'] && this.user) {
       this.form.patchValue({
-        name: this.user.full_name || '', // Map DB 'full_name' to Form 'name'
-        // location: this.user.location || '', // Uncomment if you added location to DB
+        name: this.user.full_name || '', 
         bio: this.user.bio || '',
-        // preselect current interests from user (array of strings)
       interests: this.user.interests || []
       });
       this.loadFriendsCount();
       this.loadActivities();
-      this.loadAllInterests(); // load all possible interests frmo DB
-      this.loadUserInterests();  // this user's selected interests (override form interests)
+      this.loadAllInterests(); 
+      this.loadUserInterests(); 
     }
   }
 
   toggleEdit() {
     this.edit = !this.edit;
-    // Reset form to current user data if cancelling
     if (!this.edit && this.user) {
       this.form.patchValue({
         name: this.user.full_name,
@@ -79,29 +73,23 @@ export class ProfileComponent implements OnChanges {
     try {
       const fv = this.form.value;
 
-      // Selected interest NAMES from the form
       const selectedNames: string[] = fv.interests || [];
 
-      // Map names → IDs using allInterests
       const selectedIds = this.allInterests
         .filter(i => selectedNames.includes(i.name))
         .map(i => i.id);
 
-      // Send updates to Supabase (profile basic info + interests in parallel)
       await Promise.all([
         this.supabase.updateProfileData({
           full_name: fv.name || '',
           bio: fv.bio || '',
-          // location: fv.location || '' // Uncomment if added to DB
         }),
         this.supabase.updateUserInterests(selectedIds)
       ]);
 
-      // broadcast that profile (including interests) changed
     this.supabase.notifyProfileUpdated();
 
 
-      // 5. Update local view immediately so user sees change without refresh
       this.user = { 
         ...this.user, 
         full_name: fv.name, 
@@ -132,13 +120,11 @@ export class ProfileComponent implements OnChanges {
 
   
 
-  // Helper to get initials from the Real Data
   getInitials() {
-    const name = this.user?.full_name || ''; // Use full_name from DB
+    const name = this.user?.full_name || ''; 
     const parts = name.trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return '?';
     
-    // Get first letter of first name + first letter of last name
     const letters = parts.map((s: string) => s[0]).join('');
     return letters.slice(0, 2).toUpperCase();
   }
@@ -159,13 +145,11 @@ export class ProfileComponent implements OnChanges {
     }
   }
 
-  //load interests for this user and put them on the user object for easy use
   async loadUserInterests() {
     try {
       const list = await this.supabase.getUserInterests();
       const names = list.map(i => i.name);
 
-      // save on user and form
       this.user = {
         ...this.user,
         interests: names
@@ -196,7 +180,6 @@ export class ProfileComponent implements OnChanges {
   async loadActivities() {
     this.loadingActivities = true;
     try {
-      // Promise.all runs them at the same time for speed
       const [upcoming, past] = await Promise.all([
         this.supabase.getUpcomingSavedActivities(),
         this.supabase.getPastSavedActivities()
@@ -219,7 +202,6 @@ export class ProfileComponent implements OnChanges {
     try {
       await this.supabase.signOut();
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.error('Logout failed', e);
     }
     this.router.navigateByUrl('/login');

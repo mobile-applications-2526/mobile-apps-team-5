@@ -6,7 +6,7 @@ export interface Friend {
   id: string;
   name: string;
   lastMessage?: string;
-  lastSeen?: string; // e.g. '11:53', 'Yesterday'
+  lastSeen?: string;
   unread?: number;
   avatarUrl?: string | null;
 }
