@@ -4,7 +4,6 @@
   justify-content: space-between;
   gap: 16px;
   
-  /* match profile-body horizontal layout */
   padding: 12px 16px 0;
   max-width: 480px;
   margin: 16px auto 0;
@@ -50,14 +49,13 @@
   cursor: pointer;
 }
 
-/* Main body layout */
+
 .profile-body {
   padding: 12px 16px 32px;
   max-width: 480px;
   margin: 0 auto;
 }
 
-/* Name + location */
 .name {
   font-size: 20px;
   font-weight: 700;
@@ -70,7 +68,6 @@
   margin-top: 2px;
 }
 
-/* Edit toggle button above sections */
 .edit-toggle {
   margin-top: 8px;
   margin-bottom: 16px;
@@ -83,7 +80,6 @@
   --padding-end: 16px;
 }
 
-/* Sections */
 .section {
   margin-top: 14px;
   background: #fff;
@@ -104,13 +100,11 @@
   font-size: 15px;
 }
 
-/* Small subtitle inside edit form */
 .section-subtitle {
   font-size: 14px;
   margin: 8px 0 6px;
 }
 
-/* Bio box */
 .bio-box {
   padding: 10px 12px;
   border-radius: 8px;
@@ -120,7 +114,6 @@
   font-size: 14px;
 }
 
-/* Chips for interests / languages */
 .chips {
   margin-top: 6px;
   display: flex;
@@ -134,7 +127,6 @@
   color: #4a148c;
 }
 
-/* Interest rows in edit mode */
 .interests-edit {
   background: transparent;
   box-shadow: none;
@@ -149,19 +141,16 @@
   font-size: 14px;
 }
 
-/* Reusable muted text (no interests, no activities) */
 .muted-text {
   color: gray;
   font-size: 0.9em;
   margin-top: 4px;
 }
 
-/* Saved events spacing */
 .saved-event-wrapper {
   margin-bottom: 10px;
 }
 
-/* Form actions */
 .actions {
   display: flex;
   gap: 8px;
@@ -169,7 +158,6 @@
   margin-top: 15px;
 }
 
-/* Logout section spacing */
 .logout-section {
   margin-top: 24px;
   margin-bottom: 80px;

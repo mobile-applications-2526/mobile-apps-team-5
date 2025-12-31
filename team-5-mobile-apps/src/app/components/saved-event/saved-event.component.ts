@@ -34,7 +34,7 @@ export class SavedEventComponent implements OnInit{
   }
 
   async remove(ev?: Event) {
-    if (ev) ev.stopPropagation(); // Prevents clicking the heart from opening card details
+    if (ev) ev.stopPropagation(); 
     if (!this.event?.id) return;
 
     try {

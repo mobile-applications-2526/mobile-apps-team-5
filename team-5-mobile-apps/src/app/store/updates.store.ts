@@ -4,12 +4,12 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { SupabaseService } from '../services/supabase.service';
 
 export interface UpdateItem {
-  id: string; // unique ID for tracking (e.g. 'msg_roomId' or 'req_id')
+  id: string;
   type: 'FRIEND_REQUEST' | 'MESSAGE' | 'EVENT_REMINDER' | 'EVENT_POPULAR';
   title: string;
   description: string;
-  timestamp: string; // ISO string
-  data: any; // Context data (roomId, activityId, etc.)
+  timestamp: string;
+  data: any;
   icon?: string;
   color?: string;
 }
@@ -30,7 +30,6 @@ export class UpdatesStore {
     this._loading.next(true);
 
     try {
-      // Fetch all sources in parallel
       const [
         friendRequests,
         unreadChats,
@@ -45,7 +44,6 @@ export class UpdatesStore {
 
       const items: UpdateItem[] = [];
 
-      // 1. Friend Requests
       friendRequests.forEach((req: any) => {
         items.push({
           id: `req_${req.id}`,
@@ -59,21 +57,19 @@ export class UpdatesStore {
         });
       });
 
-      // 2. Unread Messages
       unreadChats.forEach((chat: any) => {
         items.push({
           id: `msg_${chat.roomId}`,
           type: 'MESSAGE',
           title: chat.roomName || 'New Messages',
           description: `You have ${chat.count} unread messages.`,
-          timestamp: new Date().toISOString(), // Use current time or fetch latest
+          timestamp: new Date().toISOString(),
           data: { roomId: chat.roomId },
           icon: 'chatbubbles',
           color: 'success'
         });
       });
 
-      // 3. Upcoming Events
       upcomingEvents.forEach((act: any) => {
         items.push({
           id: `event_up_${act.id}`,
@@ -87,7 +83,6 @@ export class UpdatesStore {
         });
       });
 
-      // 4. Popular Events
       popularEvents.forEach((act: any) => {
         items.push({
           id: `event_pop_${act.id}`,
@@ -101,7 +96,6 @@ export class UpdatesStore {
         });
       });
 
-      // Sort by newest first
       items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
       this._updates.next(items);

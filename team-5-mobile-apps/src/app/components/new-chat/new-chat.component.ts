@@ -5,18 +5,17 @@ import { IonicModule, ModalController } from '@ionic/angular';
 import { SupabaseService } from '../../services/supabase.service';
 import { Observable } from 'rxjs'; // Import Observable
 
-// Define Friend interface locally or import from store if desired
 interface Friend {
     id: string;
     name: string;
-    avatarUrl?: string; // Make optional if not always present
+    avatarUrl?: string;
     selected?: boolean;
 }
 
 @Component({
     selector: 'app-new-chat',
     standalone: true, // Mark as standalone
-    imports: [CommonModule, FormsModule, IonicModule], // Import definitions
+    imports: [CommonModule, FormsModule, IonicModule],
     templateUrl: './new-chat.component.html',
     styleUrls: ['./new-chat.component.scss'],
 })
@@ -47,7 +46,6 @@ export class NewChatComponent implements OnInit {
         if (selected.length === 0) return;
 
         if (selected.length === 1 && !this.groupName) {
-            // Direct chat
             try {
                 this.loading = true;
                 const roomId = await this.supabase.startDirectChat(selected[0].id);
@@ -58,7 +56,6 @@ export class NewChatComponent implements OnInit {
                 this.loading = false;
             }
         } else {
-            // Group chat
             const name = this.groupName || selected.map(f => f.name).join(', ').slice(0, 30);
             try {
                 this.loading = true;

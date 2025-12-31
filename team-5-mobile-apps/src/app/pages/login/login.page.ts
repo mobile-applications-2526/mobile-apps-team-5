@@ -37,10 +37,8 @@ export class LoginPage {
     this.loading = false;
 
     if (profile && profile.full_name) {
-      // Case 1: Profile exists and has a name -> Go to App
       this.router.navigateByUrl('/tabs/explore');
     } else {
-      // Case 2: Profile is empty or missing -> Go to Setup
       this.router.navigateByUrl('/profile-setup');
     }
   }
@@ -56,7 +54,6 @@ export class LoginPage {
       return;
     }
     alert('Registration successful! Please check your email to verify your account.');
-    // After sign up, success -> profile setup page
     this.form.reset();
   }
 }
