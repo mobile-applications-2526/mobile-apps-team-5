@@ -15,8 +15,16 @@ describe('ProfileSetupPage', () => {
   let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
-    supabaseSpy = jasmine.createSpyObj('SupabaseService', ['completeProfile']);
+     supabaseSpy = jasmine.createSpyObj('SupabaseService', [
+      'completeProfile',
+      'getAllInterests',
+      'updateUserInterests',
+    ]);
     routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
+
+    // default behaviours so tests don't crash
+    supabaseSpy.getAllInterests.and.returnValue(Promise.resolve([]));
+    supabaseSpy.updateUserInterests.and.returnValue(Promise.resolve());
 
     await TestBed.configureTestingModule({
       imports: [IonicModule.forRoot(), ProfileSetupPage],
@@ -47,14 +55,24 @@ describe('ProfileSetupPage', () => {
   });
 
   //test succesful case
-  it('calls completeProfile and navigates on success', async () => {
+  it('calls completeProfile, updates interests and navigates on success', async () => {
     component.firstName = 'John';
     component.lastName = 'Doe';
     component.bio = 'Hello!';
+
+    // no validation on interests, so empty is fine
     supabaseSpy.completeProfile.and.returnValue(Promise.resolve());
+
     await component.onComplete();
-    expect(supabaseSpy.completeProfile).toHaveBeenCalledWith('John', 'Doe', 'Hello!');
-    expect(routerSpy.navigateByUrl).toHaveBeenCalledWith('/tabs/explore', { replaceUrl: true });
+
+    expect(supabaseSpy.completeProfile)
+      .toHaveBeenCalledWith('John', 'Doe', 'Hello!');
+
+    // interests should still be updated (likely with an empty array)
+    expect(supabaseSpy.updateUserInterests).toHaveBeenCalled();
+
+    expect(routerSpy.navigateByUrl)
+      .toHaveBeenCalledWith('/tabs/explore', { replaceUrl: true });
   });
 
   //test error case
