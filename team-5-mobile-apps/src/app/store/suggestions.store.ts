@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { SupabaseService } from '../services/supabase.service';
+import { ProfileService } from '../services/profile.service';
+import { FriendService } from '../services/friend.service';
 
 export interface Suggestion {
   id: string;
@@ -23,14 +24,17 @@ export class SuggestionsStore {
   private _suggestions$ = new BehaviorSubject<Suggestion[]>([]);
   readonly suggestions$ = this._suggestions$.asObservable();
 
-  constructor(private supabase: SupabaseService) { }
+  constructor(
+    private profileService: ProfileService,
+    private friendService: FriendService
+  ) { }
 
   get snapshot() {
     return this._suggestions$.getValue();
   }
 
   async loadSuggestions() {
-    const profiles = await this.supabase.getAllProfiles();
+    const profiles = await this.profileService.getAllProfiles();
     const suggestions: Suggestion[] = profiles.map((p: any) => ({
       id: p.id,
       name: p.full_name || p.username,
@@ -40,7 +44,7 @@ export class SuggestionsStore {
   }
 
   async sendRequest(userId: string) {
-    await this.supabase.sendFriendRequest(userId);
+    await this.friendService.sendFriendRequest(userId);
     this.remove(userId);
   }
 

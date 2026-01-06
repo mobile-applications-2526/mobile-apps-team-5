@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { SupabaseService } from '../services/supabase.service';
+import { ChatService } from '../services/chat.service';
 
 export interface ChatItem {
   id: string;
@@ -16,14 +16,14 @@ export class ChatsStore {
   private _chats$ = new BehaviorSubject<ChatItem[]>([]);
   readonly chats$ = this._chats$.asObservable();
 
-  constructor(private supabase: SupabaseService) { }
+  constructor(private chatService: ChatService) { }
 
   get snapshot() {
     return this._chats$.getValue();
   }
 
   async loadChats() {
-    const rooms = await this.supabase.getChatRooms();
+    const rooms = await this.chatService.getChatRooms();
     const chats: ChatItem[] = rooms.map((r: any) => ({
       id: r.id,
       name: r.name,

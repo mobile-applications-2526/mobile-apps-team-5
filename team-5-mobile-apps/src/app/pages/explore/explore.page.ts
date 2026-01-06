@@ -5,6 +5,8 @@ import { HeaderComponent } from '../../components/Header/header.componet';
 import { EventSwipeComponent } from '../../components/event-swipe/event-swipe.component';
 import { CommonModule } from '@angular/common';
 import { SupabaseService } from '../../services/supabase.service';
+import { ActivityService } from '../../services/activity.service';
+import { InterestService } from '../../services/interest.service';
 
 @Component({
   selector: 'app-explore',
@@ -23,7 +25,11 @@ export class ExplorePage implements OnInit, OnDestroy {
   filterByInterests: boolean = false;
   userInterestNames: string[] = [];
 
-  constructor(private supabase: SupabaseService) { }
+  constructor(
+    private supabase: SupabaseService,
+    private activityService: ActivityService,
+    private interestService: InterestService
+  ) { }
 
   async ngOnInit() {
     this.profileUpdatedSub = this.supabase.profileUpdated$.subscribe(() => {
@@ -37,8 +43,8 @@ export class ExplorePage implements OnInit, OnDestroy {
     this.loading = true;
     try {
       const [activities, userInterests] = await Promise.all([
-        this.supabase.getActivities(),
-        this.supabase.getUserInterests()
+        this.activityService.getActivities(),
+        this.interestService.getUserInterests()
       ]);
 
       this.activities = activities || [];
@@ -59,7 +65,7 @@ export class ExplorePage implements OnInit, OnDestroy {
     console.log(`Saving swipe for activity ${event.id}: ${event.liked}`);
 
     try {
-      await this.supabase.recordSwipe(event.id, event.liked);
+      await this.activityService.recordSwipe(event.id, event.liked);
 
       this.activities = this.activities.filter(a => a.id !== event.id);
 

@@ -4,6 +4,10 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
+import { ProfileService } from '../../services/profile.service';
+import { ActivityService } from '../../services/activity.service';
+import { InterestService } from '../../services/interest.service';
+import { FriendService } from '../../services/friend.service';
 import { SavedEventComponent } from '../saved-event/saved-event.component';
 
 
@@ -21,37 +25,42 @@ export class ProfileComponent implements OnChanges {
   upcomingEvents: any[] = [];
   pastEvents: any[] = [];
   loadingActivities = true;
-  allInterests: { id: string; name: string }[] = []; 
+  allInterests: { id: string; name: string }[] = [];
   loadingInterests = false;
 
   edit = false;
-  
+
   loading = false;
 
   form = this.fb.group({
     name: ['', Validators.required],
-    location: [''], 
+    location: [''],
     bio: [''],
     interests: [[] as string[]]
   });
 
   constructor(
     private fb: FormBuilder,
+
     private supabase: SupabaseService,
+    private profileService: ProfileService,
+    private activityService: ActivityService,
+    private interestService: InterestService,
+    private friendService: FriendService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['user'] && this.user) {
       this.form.patchValue({
-        name: this.user.full_name || '', 
+        name: this.user.full_name || '',
         bio: this.user.bio || '',
-      interests: this.user.interests || []
+        interests: this.user.interests || []
       });
       this.loadFriendsCount();
       this.loadActivities();
-      this.loadAllInterests(); 
-      this.loadUserInterests(); 
+      this.loadAllInterests();
+      this.loadUserInterests();
     }
   }
 
@@ -80,23 +89,23 @@ export class ProfileComponent implements OnChanges {
         .map(i => i.id);
 
       await Promise.all([
-        this.supabase.updateProfileData({
+        this.profileService.updateProfileData({
           full_name: fv.name || '',
           bio: fv.bio || '',
         }),
-        this.supabase.updateUserInterests(selectedIds)
+        this.interestService.updateUserInterests(selectedIds)
       ]);
 
-    this.supabase.notifyProfileUpdated();
+      this.supabase.notifyProfileUpdated();
 
 
-      this.user = { 
-        ...this.user, 
-        full_name: fv.name, 
-        bio: fv.bio ,
+      this.user = {
+        ...this.user,
+        full_name: fv.name,
+        bio: fv.bio,
         interests: selectedNames
       };
-      
+
       this.edit = false;
 
     } catch (error) {
@@ -110,21 +119,21 @@ export class ProfileComponent implements OnChanges {
   async loadFriendsCount() {
     if (!this.user?.id) return;
     try {
-      
-      const count = await this.supabase.getFriendsCount(this.user.id);
+
+      const count = await this.friendService.getFriendsCount(this.user.id);
       this.user.friendsCount = count;
     } catch (e) {
       console.error('Error loading friends count', e);
     }
   }
 
-  
+
 
   getInitials() {
-    const name = this.user?.full_name || ''; 
+    const name = this.user?.full_name || '';
     const parts = name.trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return '?';
-    
+
     const letters = parts.map((s: string) => s[0]).join('');
     return letters.slice(0, 2).toUpperCase();
   }
@@ -136,7 +145,7 @@ export class ProfileComponent implements OnChanges {
   async loadAllInterests() {
     this.loadingInterests = true;
     try {
-      this.allInterests = await this.supabase.getAllInterests();
+      this.allInterests = await this.interestService.getAllInterests();
     } catch (e) {
       console.error('Error loading interests', e);
       this.allInterests = [];
@@ -147,7 +156,7 @@ export class ProfileComponent implements OnChanges {
 
   async loadUserInterests() {
     try {
-      const list = await this.supabase.getUserInterests();
+      const list = await this.interestService.getUserInterests();
       const names = list.map(i => i.name);
 
       this.user = {
@@ -181,8 +190,8 @@ export class ProfileComponent implements OnChanges {
     this.loadingActivities = true;
     try {
       const [upcoming, past] = await Promise.all([
-        this.supabase.getUpcomingSavedActivities(),
-        this.supabase.getPastSavedActivities()
+        this.activityService.getUpcomingSavedActivities(),
+        this.activityService.getPastSavedActivities()
       ]);
       this.upcomingEvents = upcoming;
       this.pastEvents = past;
@@ -196,7 +205,7 @@ export class ProfileComponent implements OnChanges {
     this.pastEvents = this.pastEvents.filter(e => e.id !== id);
   }
 
-  
+
 
   async logout() {
     try {
@@ -207,5 +216,5 @@ export class ProfileComponent implements OnChanges {
     this.router.navigateByUrl('/login');
   }
 
-  
+
 }

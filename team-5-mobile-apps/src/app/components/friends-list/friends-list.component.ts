@@ -4,7 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { FriendsStore, Friend } from '../../store/friends.store';
-import { SupabaseService } from '../../services/supabase.service';
+import { ChatService } from '../../services/chat.service';
 
 @Component({
   selector: 'app-friends-list',
@@ -21,14 +21,14 @@ export class FriendsListComponent {
   constructor(
     public friendsStore: FriendsStore,
     private router: Router,
-    private supabase: SupabaseService
+    private chatService: ChatService
   ) {
     this.friends$ = this.friendsStore.friends$;
   }
 
   async startChat(friendId: string) {
     try {
-      const roomId = await this.supabase.startDirectChat(friendId);
+      const roomId = await this.chatService.startDirectChat(friendId);
       this.router.navigate(['/chats', roomId]);
     } catch (e) {
       console.error('Error starting chat:', e);
