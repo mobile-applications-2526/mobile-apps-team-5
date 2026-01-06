@@ -22,18 +22,21 @@ export class SupabaseService {
     }
     let storage: SupportedStorage | undefined;
     try {
-      const prefs = require('@capacitor/preferences');
-      const Preferences = prefs.Preferences;
+      const { CapacitorSecureStorage } = require('capacitor-secure-storage-plugin');
       storage = {
         async getItem(key: string) {
-          const { value } = await Preferences.get({ key });
-          return value ?? null;
+          try {
+            const { value } = await CapacitorSecureStorage.get({ key });
+            return value ?? null;
+          } catch {
+            return null;
+          }
         },
         async setItem(key: string, value: string) {
-          await Preferences.set({ key, value });
+          await CapacitorSecureStorage.set({ key, value });
         },
         async removeItem(key: string) {
-          await Preferences.remove({ key });
+          await CapacitorSecureStorage.remove({ key });
         },
       } as SupportedStorage;
     } catch {
