@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonSpinner, IonButtons, IonButton, IonIcon, NavController } from '@ionic/angular/standalone';
 import { ProfileComponent } from '../../components/profile/profile.component';
 import { SupabaseService } from '../../services/supabase.service';
+import { ProfileService } from '../../services/profile.service';
 
 @Component({
   selector: 'app-profile-page',
@@ -17,7 +18,8 @@ export class ProfilePage {
 
   constructor(
     private nav: NavController,
-    private supabase: SupabaseService
+    private supabase: SupabaseService,
+    private profileService: ProfileService
   ) { }
 
   async ngOnInit() {
@@ -26,7 +28,7 @@ export class ProfilePage {
   async loadProfile() {
     this.loading = true;
     try {
-      this.profile = await this.supabase.getProfile();
+      this.profile = await this.profileService.getProfile();
       console.log('Profile loaded:', this.profile);
     } catch (error) {
       console.error(error);

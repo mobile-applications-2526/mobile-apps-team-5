@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ModalController } from '@ionic/angular';
-import { SupabaseService } from '../../services/supabase.service';
+import { FriendService } from '../../services/friend.service';
+import { ChatService } from '../../services/chat.service';
 import { Observable } from 'rxjs'; // Import Observable
 
 interface Friend {
@@ -26,12 +27,13 @@ export class NewChatComponent implements OnInit {
 
     constructor(
         private modalCtrl: ModalController,
-        private supabase: SupabaseService
+        private friendService: FriendService,
+        private chatService: ChatService
     ) { }
 
     async ngOnInit() {
         this.loading = true;
-        const profiles = await this.supabase.getFriends();
+        const profiles = await this.friendService.getFriends();
         this.friends = profiles.map((p: any) => ({
             id: p.id,
             name: p.full_name || p.username,
@@ -48,7 +50,7 @@ export class NewChatComponent implements OnInit {
         if (selected.length === 1 && !this.groupName) {
             try {
                 this.loading = true;
-                const roomId = await this.supabase.startDirectChat(selected[0].id);
+                const roomId = await this.chatService.startDirectChat(selected[0].id);
                 this.modalCtrl.dismiss({ roomId });
             } catch (e) {
                 console.error(e);
@@ -59,7 +61,7 @@ export class NewChatComponent implements OnInit {
             const name = this.groupName || selected.map(f => f.name).join(', ').slice(0, 30);
             try {
                 this.loading = true;
-                const roomId = await this.supabase.createGroupChat(name, selected.map(f => f.id));
+                const roomId = await this.chatService.createGroupChat(name, selected.map(f => f.id));
                 this.modalCtrl.dismiss({ roomId });
             } catch (e) {
                 console.error(e);

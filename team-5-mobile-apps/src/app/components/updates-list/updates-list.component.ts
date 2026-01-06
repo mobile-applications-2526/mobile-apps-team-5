@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { UpdatesStore, UpdateItem } from '../../store/updates.store';
 import { addIcons } from 'ionicons';
 import { personAdd, chatbubbles, time, flame, closeCircle, checkmarkCircle, checkmarkDoneCircle } from 'ionicons/icons';
-import { SupabaseService } from '../../services/supabase.service';
+import { ActivityService } from '../../services/activity.service';
 
 @Component({
   selector: 'app-updates-list',
@@ -23,7 +23,7 @@ export class UpdatesListComponent implements OnInit, OnDestroy {
     private store: UpdatesStore,
     private router: Router,
     private alertCtrl: AlertController,
-    private supabase: SupabaseService
+    private activityService: ActivityService
   ) {
     addIcons({ personAdd, chatbubbles, time, flame, closeCircle, checkmarkCircle, checkmarkDoneCircle });
   }
@@ -57,7 +57,7 @@ export class UpdatesListComponent implements OnInit, OnDestroy {
             text: 'Confirm',
             handler: async () => {
               try {
-                await this.supabase.confirmActivityParticipation(item.data.activityId);
+                await this.activityService.confirmActivityParticipation(item.data.activityId);
                 this.store.loadUpdates();
               } catch (e) {
                 console.error('Error confirming:', e);

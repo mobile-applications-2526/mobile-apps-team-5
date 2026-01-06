@@ -2,10 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
-import { Router } from '@angular/router'; 
+import { ActivityService } from '../../services/activity.service';
+import { InterestService } from '../../services/interest.service';
+import { Router } from '@angular/router';
 
 
-import { 
+import {
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonItem, IonLabel, IonInput, IonText, IonSelect, IonSelectOption,
   IonTextarea, IonGrid, IonRow, IonCol, IonButton, IonSpinner,
@@ -24,9 +26,9 @@ function minLessOrEqualMax(group: AbstractControl): ValidationErrors | null {
   standalone: true,
   templateUrl: './create-event-form.component.html',
   styleUrls: ['./create-event-form.component.scss'],
- 
+
   imports: [
-    CommonModule, 
+    CommonModule,
     ReactiveFormsModule,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent,
     IonItem, IonLabel, IonInput, IonText, IonSelect, IonSelectOption,
@@ -35,7 +37,7 @@ function minLessOrEqualMax(group: AbstractControl): ValidationErrors | null {
   ]
 })
 export class CreateEventFormComponent implements OnInit {
-  
+
   form = this.fb.group(
     {
       name: ['', [Validators.required, Validators.minLength(3)]],
@@ -45,7 +47,7 @@ export class CreateEventFormComponent implements OnInit {
       maxParticipants: [10, [Validators.required, Validators.min(1)]],
       date: ['', Validators.required],
       location: ['', Validators.required],
-      image: [null as File | null] 
+      image: [null as File | null]
     },
     { validators: [minLessOrEqualMax] }
   );
@@ -56,18 +58,20 @@ export class CreateEventFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private supabase: SupabaseService,
-    private router: Router 
-  ) {}
+    private activityService: ActivityService,
+    private interestService: InterestService,
+    private router: Router
+  ) { }
 
   async ngOnInit() {
-    this.categories = await this.supabase.getAllInterests();
-    
-    
+    this.categories = await this.interestService.getAllInterests();
+
+
     const now = new Date().toISOString();
     this.form.patchValue({ date: now });
   }
 
-  
+
   onDateChange(event: any) {
     const selectedDate = event.detail.value;
     this.form.patchValue({ date: selectedDate });
@@ -80,7 +84,7 @@ export class CreateEventFormComponent implements OnInit {
       return;
     }
     const file = input.files[0];
-   
+
     this.form.patchValue({ image: file });
   }
 
@@ -104,12 +108,12 @@ export class CreateEventFormComponent implements OnInit {
         image: this.form.value.image
       };
 
-      await this.supabase.createActivity(activityData);
+      await this.activityService.createActivity(activityData);
 
       alert('Event created successfully!');
       this.form.reset();
-      
-      
+
+
       this.router.navigate(['/tabs/explore']);
 
     } catch (error: any) {

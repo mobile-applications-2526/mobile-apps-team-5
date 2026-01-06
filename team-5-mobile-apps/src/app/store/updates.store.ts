@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
-import { SupabaseService } from '../services/supabase.service';
+import { FriendService } from '../services/friend.service';
+import { ChatService } from '../services/chat.service';
+import { ActivityService } from '../services/activity.service';
 
 export interface UpdateItem {
   id: string;
@@ -24,7 +26,11 @@ export class UpdatesStore {
   private _loading = new BehaviorSubject<boolean>(false);
   readonly loading$ = this._loading.asObservable();
 
-  constructor(private supabase: SupabaseService) { }
+  constructor(
+    private friendService: FriendService,
+    private chatService: ChatService,
+    private activityService: ActivityService
+  ) { }
 
   async loadUpdates() {
     this._loading.next(true);
@@ -37,11 +43,11 @@ export class UpdatesStore {
         popularEvents,
         confirmations
       ] = await Promise.all([
-        this.supabase.getFriendRequests(),
-        this.supabase.getUnreadChats(),
-        this.supabase.getUpcomingLikedActivities(),
-        this.supabase.getPopularLikedActivities(),
-        this.supabase.getActivitiesForConfirmation()
+        this.friendService.getFriendRequests(),
+        this.chatService.getUnreadChats(),
+        this.activityService.getUpcomingLikedActivities(),
+        this.activityService.getPopularLikedActivities(),
+        this.activityService.getActivitiesForConfirmation()
       ]);
 
       const items: UpdateItem[] = [];

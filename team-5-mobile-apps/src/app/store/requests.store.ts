@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { SupabaseService } from '../services/supabase.service';
+import { FriendService } from '../services/friend.service';
 
 export interface FriendRequest {
     id: string;
@@ -14,14 +14,14 @@ export class RequestsStore {
     private _requests$ = new BehaviorSubject<FriendRequest[]>([]);
     readonly requests$ = this._requests$.asObservable();
 
-    constructor(private supabase: SupabaseService) { }
+    constructor(private friendService: FriendService) { }
 
     get snapshot() {
         return this._requests$.getValue();
     }
 
     async loadRequests() {
-        const data = await this.supabase.getFriendRequests();
+        const data = await this.friendService.getFriendRequests();
         const requests: FriendRequest[] = data.map((r: any) => ({
             id: r.id,
             senderName: r.sender?.full_name || r.sender?.username || 'Unknown',
@@ -32,7 +32,7 @@ export class RequestsStore {
     }
 
     async acceptRequest(id: string) {
-        await this.supabase.acceptFriendRequest(id);
+        await this.friendService.acceptFriendRequest(id);
         this._requests$.next(this.snapshot.filter(r => r.id !== id));
     }
 }
