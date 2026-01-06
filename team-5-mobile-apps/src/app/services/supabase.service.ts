@@ -617,14 +617,18 @@ export class SupabaseService {
       let name = 'Unknown Chat';
       let avatarUrl = undefined;
 
-      const participants = room.chat_room_participants as any[];
-      const otherPart = participants.find((p) => p.participant !== user.id);
+      if (room.name && room.name !== 'Direct Chat') {
+        name = room.name;
+      } else {
+        const participants = room.chat_room_participants as any[];
+        const otherPart = participants.find((p) => p.participant !== user.id);
 
-      if (otherPart) {
-        const profile = profileMap.get(otherPart.participant);
-        if (profile) {
-          name = profile.full_name || profile.username || 'Unknown';
-          avatarUrl = profile.avatar_url;
+        if (otherPart) {
+          const profile = profileMap.get(otherPart.participant);
+          if (profile) {
+            name = profile.full_name || profile.username || 'Unknown';
+            avatarUrl = profile.avatar_url;
+          }
         }
       }
 
@@ -1043,7 +1047,7 @@ export class SupabaseService {
           const { data: newRoom, error: createError } = await this._client
             .from('chat_rooms')
             .insert({
-              name: activity.name,
+              name: `${activity.name} chat`,
               creator: user.id,
               activity_id: activityId
             })
