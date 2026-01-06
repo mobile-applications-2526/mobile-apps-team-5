@@ -5,7 +5,7 @@ import { SupabaseService } from '../services/supabase.service';
 
 export interface UpdateItem {
   id: string;
-  type: 'FRIEND_REQUEST' | 'MESSAGE' | 'EVENT_REMINDER' | 'EVENT_POPULAR';
+  type: 'FRIEND_REQUEST' | 'MESSAGE' | 'EVENT_REMINDER' | 'EVENT_POPULAR' | 'ACTIVITY_CONFIRMATION';
   title: string;
   description: string;
   timestamp: string;
@@ -34,12 +34,14 @@ export class UpdatesStore {
         friendRequests,
         unreadChats,
         upcomingEvents,
-        popularEvents
+        popularEvents,
+        confirmations
       ] = await Promise.all([
         this.supabase.getFriendRequests(),
         this.supabase.getUnreadChats(),
         this.supabase.getUpcomingLikedActivities(),
-        this.supabase.getPopularLikedActivities()
+        this.supabase.getPopularLikedActivities(),
+        this.supabase.getActivitiesForConfirmation()
       ]);
 
       const items: UpdateItem[] = [];
@@ -93,6 +95,19 @@ export class UpdatesStore {
           data: { activityId: act.id },
           icon: 'flame',
           color: 'danger'
+        });
+      });
+
+      confirmations.forEach((act: any) => {
+        items.push({
+          id: `confirm_${act.id}`,
+          type: 'ACTIVITY_CONFIRMATION',
+          title: 'Confirm Participation',
+          description: `"${act.name}" is ready! Confirm to join the group chat.`,
+          timestamp: new Date().toISOString(),
+          data: { activityId: act.id },
+          icon: 'checkmark-circle',
+          color: 'secondary'
         });
       });
 

@@ -231,7 +231,7 @@ export class SupabaseService {
     if (!file) return '';
 
     const filePath = `public/${Date.now()}-${file.name}`;
-    const bucket = 'activity_images'; //bucket name in storage is the same 
+    const bucket = 'activity_images';
 
     const { error: uploadError } = await this._client.storage
       .from(bucket)
@@ -305,7 +305,7 @@ export class SupabaseService {
 
     const { data: mySwipes, error: swipeError } = await this._client
       .from('activity_swipes')
-      .select('swipe') // This column holds the Activity ID
+      .select('swipe')
       .eq('user_id', user.id);
 
     if (swipeError) {
@@ -553,7 +553,7 @@ export class SupabaseService {
       .select('*', { count: 'exact', head: true })
       .or(`user_id_1.eq.${userId},user_id_2.eq.${userId}`)
       .eq('status', 'accepted');
-  
+
     if (error) {
       console.error('Error counting friends:', error);
       return 0;
@@ -898,7 +898,7 @@ export class SupabaseService {
 
     const { error } = await this._client
       .from('activity_swipes')
-      .update({ starred: isStarred }) 
+      .update({ starred: isStarred })
       .eq('user_id', user.id)
       .eq('swipe', activityId);
 
@@ -917,7 +917,7 @@ export class SupabaseService {
       console.error('Error fetching participant count:', error);
       return 0;
     }
-    
+
     return data || 0;
   }
 
@@ -934,6 +934,139 @@ export class SupabaseService {
     if (error) {
       console.error('Error removing saved activity:', error);
       throw error;
+    }
+  }
+
+  async getActivitiesForConfirmation() {
+    const user = await this.getCurrentUser();
+    if (!user) return [];
+
+    const { data: swipes, error: swipeError } = await this._client
+      .from('activity_swipes')
+      .select('swipe')
+      .eq('user_id', user.id)
+      .eq('liked', true)
+      .or('confirmed.is.null,confirmed.eq.false');
+
+    if (swipeError) {
+      console.error('Error fetching unconfirmed swipes:', swipeError);
+      return [];
+    }
+
+    if (!swipes || swipes.length === 0) return [];
+    const activityIds = swipes.map((s: any) => s.swipe);
+
+    const { data: activities, error: actError } = await this._client
+      .from('activities')
+      .select('*')
+      .in('id', activityIds);
+
+    if (actError) {
+      console.error('Error fetching activities for confirmation:', actError);
+      return [];
+    }
+
+    if (!activities || activities.length === 0) return [];
+
+    const readyToConfirm = [];
+
+    for (const act of activities) {
+      const count = await this.getParticipantCount(act.id);
+      if (count >= (act.min_participants || 2)) {
+        readyToConfirm.push(act);
+      }
+    }
+
+    return readyToConfirm;
+  }
+
+  async confirmActivityParticipation(activityId: string) {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('Not logged in');
+
+    const { error: updateError } = await this._client
+      .from('activity_swipes')
+      .update({ confirmed: true })
+      .eq('user_id', user.id)
+      .eq('swipe', activityId);
+
+    if (updateError) throw updateError;
+
+    const { count: confirmedCount, error: countError } = await this._client
+      .from('activity_swipes')
+      .select('*', { count: 'exact', head: true })
+      .eq('swipe', activityId)
+      .eq('confirmed', true);
+
+    if (countError) {
+      console.error('Error counting confirmed participants:', countError);
+      return;
+    }
+
+    const { data: activity } = await this._client
+      .from('activities')
+      .select('*')
+      .eq('id', activityId)
+      .single();
+
+    if (!activity) return;
+
+    if ((confirmedCount || 0) >= (activity.min_participants || 2)) {
+
+      const { data: existingRoom } = await this._client
+        .from('chat_rooms')
+        .select('*')
+        .eq('activity_id', activityId)
+        .single();
+
+      if (existingRoom) {
+        const { error: joinError } = await this._client
+          .from('chat_room_participants')
+          .insert({
+            room_id: existingRoom.id,
+            participant: user.id
+          });
+        if (joinError && joinError.code !== '23505') {
+          console.error('Error joining activity chat:', joinError);
+        }
+
+      } else {
+        const { data: confirmedSwipes } = await this._client
+          .from('activity_swipes')
+          .select('user_id')
+          .eq('swipe', activityId)
+          .eq('confirmed', true);
+
+        if (confirmedSwipes && confirmedSwipes.length > 0) {
+          const participantIds = confirmedSwipes.map((s: any) => s.user_id);
+
+          const { data: newRoom, error: createError } = await this._client
+            .from('chat_rooms')
+            .insert({
+              name: activity.name,
+              creator: user.id,
+              activity_id: activityId
+            })
+            .select()
+            .single();
+
+          if (createError) {
+            console.error('Error creating activity chat:', createError);
+            return;
+          }
+
+          const participantsData = participantIds.map((uid: string) => ({
+            room_id: newRoom.id,
+            participant: uid
+          }));
+
+          const { error: partError } = await this._client
+            .from('chat_room_participants')
+            .insert(participantsData);
+
+          if (partError) console.error('Error adding participants to activity chat:', partError);
+        }
+      }
     }
   }
 }
