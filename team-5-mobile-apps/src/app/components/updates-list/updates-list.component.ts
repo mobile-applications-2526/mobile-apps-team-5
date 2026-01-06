@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { UpdatesStore, UpdateItem } from '../../store/updates.store';
 import { addIcons } from 'ionicons';
-import { personAdd, chatbubbles, time, flame, closeCircle, checkmarkCircle } from 'ionicons/icons';
+import { personAdd, chatbubbles, time, flame, closeCircle, checkmarkCircle, checkmarkDoneCircle } from 'ionicons/icons';
 import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
@@ -25,7 +25,7 @@ export class UpdatesListComponent implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private supabase: SupabaseService
   ) {
-    addIcons({ personAdd, chatbubbles, time, flame, closeCircle, checkmarkCircle });
+    addIcons({ personAdd, chatbubbles, time, flame, closeCircle, checkmarkCircle, checkmarkDoneCircle });
   }
 
   ngOnInit() {
