@@ -14,18 +14,30 @@
   </ion-header>
 
   <app-header name="Saved"></app-header>
-  
+
+  <div class="ion-padding-horizontal ion-margin-bottom">
+    <ion-segment [value]="filterType" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="upcoming">
+        <ion-label>Upcoming</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="past">
+        <ion-label>Past</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+
   <div class="saved-list">
     <ng-container *ngIf="saved?.length; else empty">
       <ng-container *ngFor="let ev of saved">
-        <app-saved-event 
-        [event]="ev" 
-        (removeClicked)="onItemRemoved($event)"> 
-  </app-saved-event>
+        <app-saved-event [event]="ev" (removeClicked)="onItemRemoved($event)">
+        </app-saved-event>
       </ng-container>
     </ng-container>
     <ng-template #empty>
-      <div class="empty-state">No liked events yet</div>
+      <div class="empty-state">No events found</div>
     </ng-template>
   </div>
 </ion-content>
