@@ -47,10 +47,22 @@ export class UpdatesListComponent implements OnInit, OnDestroy {
     } else if (item.type === 'ACTIVITY_CONFIRMATION') {
       const alert = await this.alertCtrl.create({
         header: 'Confirm Participation',
-        message: 'Do you want to confirm your participation? This will add you to the group chat if enough people conform.',
+        message: 'Do you want to confirm your participation? This will add you to the group chat if enough people confirm.',
         buttons: [
           {
-            text: 'Cancel',
+            text: 'Decline',
+            role: 'destructive',
+            handler: async () => {
+              try {
+                await this.activityService.removeSavedActivity(item.data.activityId);
+                this.store.loadUpdates();
+              } catch (e) {
+                console.error('Error declining:', e);
+              }
+            }
+          },
+          {
+            text: 'Decide Later',
             role: 'cancel'
           },
           {
