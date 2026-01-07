@@ -427,25 +427,27 @@ export class ActivityService {
     }
 
     async getActivityParticipants(activityId: string) {
-        const { data, error } = await this.supabase.client
-            .from('activity_swipes')
-            .select('user_id')
-            .eq('swipe', activityId)
-            .eq('liked', true);
+        const { data, error } = await this.supabase.client.rpc('get_activity_participants', {
+            activity_uuid: activityId
+        });
 
         if (error) {
-            console.error('Error fetching participants:', error);
-            return [];
+            console.error('Error fetching participants via RPC (falling back to standard query):', error);
+            const { data: fallbackData } = await this.supabase.client
+                .from('activity_swipes')
+                .select('user_id')
+                .eq('swipe', activityId)
+                .eq('liked', true);
+
+            if (!fallbackData || fallbackData.length === 0) return [];
+            const userIds = fallbackData.map((x: any) => x.user_id);
+            const { data: profiles } = await this.supabase.client
+                .from('profiles')
+                .select('*')
+                .in('id', userIds);
+            return profiles || [];
         }
 
-        if (!data || data.length === 0) return [];
-
-        const userIds = data.map((x: any) => x.user_id);
-        const { data: profiles } = await this.supabase.client
-            .from('profiles')
-            .select('*')
-            .in('id', userIds);
-
-        return profiles || [];
+        return data || [];
     }
 }
