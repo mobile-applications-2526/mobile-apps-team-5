@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { SupabaseService } from '../services/supabase.service';
+import { FriendService } from '../services/friend.service';
 
 export interface Friend {
   id: string;
@@ -16,14 +16,14 @@ export class FriendsStore {
   private _friends$ = new BehaviorSubject<Friend[]>([]);
   readonly friends$ = this._friends$.asObservable();
 
-  constructor(private supabase: SupabaseService) { }
+  constructor(private friendService: FriendService) { }
 
   get snapshot() {
     return this._friends$.getValue();
   }
 
   async loadFriends() {
-    const profiles = await this.supabase.getFriends();
+    const profiles = await this.friendService.getFriends();
     const friends: Friend[] = profiles.map((p: any) => ({
       id: p.id,
       name: p.full_name || p.username,

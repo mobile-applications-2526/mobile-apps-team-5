@@ -1,17 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; 
-import {Router} from '@angular/router'
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router'
 import { SupabaseService } from '../../services/supabase.service';
-import { 
-  IonContent, 
-  IonHeader, 
-  IonTitle, 
-  IonToolbar, 
-  IonItem, 
-  IonLabel, 
-  IonInput, 
-  IonTextarea, 
+import { ProfileService } from '../../services/profile.service';
+import { InterestService } from '../../services/interest.service';
+import {
+  IonContent,
+  IonHeader,
+  IonTitle,
+  IonToolbar,
+  IonItem,
+  IonLabel,
+  IonInput,
+  IonTextarea,
   IonButton,
   IonSpinner,
   IonCheckbox,
@@ -23,16 +25,16 @@ import {
   templateUrl: './profile-setup.page.html',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    IonContent, 
-    IonHeader, 
-    IonTitle, 
-    IonToolbar, 
-    IonItem, 
-    IonLabel, 
-    IonInput, 
-    IonTextarea, 
+    CommonModule,
+    FormsModule,
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    IonItem,
+    IonLabel,
+    IonInput,
+    IonTextarea,
     IonButton,
     IonSpinner,
     IonCheckbox,
@@ -44,7 +46,7 @@ export class ProfileSetupPage implements OnInit {
   firstName: string = '';
   lastName: string = '';
   bio: string = '';
-  
+
   loading: boolean = false;
 
   allInterests: { id: string; name: string }[] = [];
@@ -52,7 +54,9 @@ export class ProfileSetupPage implements OnInit {
   selectedInterests: string[] = [];
 
   constructor(
-    private supabase: SupabaseService, 
+    private supabase: SupabaseService,
+    private profileService: ProfileService,
+    private interestService: InterestService,
     private router: Router
   ) { }
 
@@ -63,7 +67,7 @@ export class ProfileSetupPage implements OnInit {
   async loadAllInterests() {
     this.loadingInterests = true;
     try {
-      this.allInterests = await this.supabase.getAllInterests();
+      this.allInterests = await this.interestService.getAllInterests();
     } catch (e) {
       console.error('Error loading interests in setup page', e);
       this.allInterests = [];
@@ -83,7 +87,7 @@ export class ProfileSetupPage implements OnInit {
   }
 
   async onComplete() {
-    
+
     if (!this.firstName || !this.lastName) {
       alert('Please enter your First Name and Surname.');
       return;
@@ -92,9 +96,9 @@ export class ProfileSetupPage implements OnInit {
     this.loading = true;
 
     try {
-      await this.supabase.completeProfile(
-        this.firstName, 
-        this.lastName, 
+      await this.profileService.completeProfile(
+        this.firstName,
+        this.lastName,
         this.bio
       );
 
@@ -103,9 +107,9 @@ export class ProfileSetupPage implements OnInit {
         .map(i => i.id);
 
       if (selectedIds.length > 0) {
-        await this.supabase.updateUserInterests(selectedIds);
+        await this.interestService.updateUserInterests(selectedIds);
       } else {
-        await this.supabase.updateUserInterests([]);
+        await this.interestService.updateUserInterests([]);
       }
 
       this.router.navigateByUrl('/tabs/explore', { replaceUrl: true });

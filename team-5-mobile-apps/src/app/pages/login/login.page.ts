@@ -3,6 +3,7 @@ import { IonContent, IonHeader, IonTitle, IonToolbar, IonItem, IonInput, IonButt
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
+import { ProfileService } from '../../services/profile.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -20,7 +21,7 @@ export class LoginPage {
   loading = false;
   error = '';
 
-  constructor(private fb: FormBuilder, private supabase: SupabaseService, private router: Router) {}
+  constructor(private fb: FormBuilder, private supabase: SupabaseService, private profileService: ProfileService, private router: Router) { }
 
   async login() {
     if (this.form.invalid) return;
@@ -33,7 +34,7 @@ export class LoginPage {
       this.error = error.message;
       return;
     }
-    const profile = await this.supabase.getProfile();
+    const profile = await this.profileService.getProfile();
     this.loading = false;
 
     if (profile && profile.full_name) {

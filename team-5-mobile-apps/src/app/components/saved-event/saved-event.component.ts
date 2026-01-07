@@ -1,7 +1,10 @@
-import { Component, Input, Output, EventEmitter, OnInit} from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { SupabaseService } from 'src/app/services/supabase.service';
+import { FriendService } from 'src/app/services/friend.service';
+import { ActivityService } from 'src/app/services/activity.service';
+import { ActivityDetailsComponent } from '../activity-details/activity-details.component';
 
 @Component({
   selector: 'app-saved-event',
@@ -10,7 +13,7 @@ import { SupabaseService } from 'src/app/services/supabase.service';
   templateUrl: './saved-event.component.html',
   styleUrls: ['./saved-event.component.scss'],
 })
-export class SavedEventComponent implements OnInit{
+export class SavedEventComponent implements OnInit {
   @Input() event!: any;
   actualParticipants: number = 0;
 
@@ -18,50 +21,66 @@ export class SavedEventComponent implements OnInit{
 
   friendsCount: number = 0;
   loadingFriends = true;
-  constructor(private supabase: SupabaseService) {}
+  constructor(
+    private supabase: SupabaseService,
+    private friendService: FriendService,
+    private activityService: ActivityService,
+    private modalCtrl: ModalController
+  ) { }
 
   async ngOnInit() {
     if (this.event?.id) {
       const [fCount, pCount] = await Promise.all([
-        this.supabase.getMutualFriendsCount(this.event.id),
-        this.supabase.getParticipantCount(this.event.id) 
+        this.friendService.getMutualFriendsCount(this.event.id),
+        this.activityService.getParticipantCount(this.event.id)
       ]);
-      
+
       this.friendsCount = fCount;
       this.actualParticipants = pCount;
       this.loadingFriends = false;
     }
   }
 
+  async openDetails() {
+    const modal = await this.modalCtrl.create({
+      component: ActivityDetailsComponent,
+      componentProps: {
+        activity: this.event
+      }
+    });
+    await modal.present();
+  }
+
   async remove(ev?: Event) {
-    if (ev) ev.stopPropagation(); 
+    if (ev) ev.stopPropagation();
     if (!this.event?.id) return;
 
     try {
-      await this.supabase.removeSavedActivity(this.event.id);
+      await this.activityService.removeSavedActivity(this.event.id);
       this.removeClicked.emit(this.event.id);
     } catch (error) {
       console.error('Could not remove activity', error);
-    }}
+    }
+  }
 
   async toggleStar(ev?: Event) {
-      if (ev) ev.stopPropagation();
-      if (!this.event) return;
-  
-      const newStatus = !this.event.starred;
-      
-      this.event.starred = newStatus;
-  
-      try {
-        await this.supabase.toggleActivityStar(this.event.id, newStatus);
-      } catch (error) {
-        console.error('Failed to star item', error);
-        this.event.starred = !newStatus; 
-      }
+    if (ev) ev.stopPropagation();
+    if (!this.event) return;
+
+    const newStatus = !this.event.starred;
+
+    this.event.starred = newStatus;
+
+    try {
+      await this.activityService.toggleActivityStar(this.event.id, newStatus);
+    } catch (error) {
+      console.error('Failed to star item', error);
+      this.event.starred = !newStatus;
     }
-  
+  }
+
   get participantsLabel() {
     const max = this.event.max_participants || this.event.maxParticipants || 0;
     return `${this.actualParticipants}/${max}`;
   }
-  }
+}

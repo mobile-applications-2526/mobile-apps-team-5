@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { SupabaseService } from '../services/supabase.service';
+import { ActivityService } from '../services/activity.service';
 
 @Injectable({ providedIn: 'root' })
 export class SavedStore {
   private _saved = new BehaviorSubject<any[]>([]);
   readonly saved$: Observable<any[]> = this._saved.asObservable();
 
-  constructor(private supabase: SupabaseService) {
+  constructor(private activityService: ActivityService) {
     this.load();
   }
 
   async load() {
     try {
-      const activities = await this.supabase.getSavedActivities();
+      const activities = await this.activityService.getSavedActivities();
       const saved = activities.map((a: any) => ({
         id: a.id,
         name: a.name,
@@ -39,7 +39,7 @@ export class SavedStore {
 
   async remove(id: string) {
     try {
-      await this.supabase.unrecordSwipe(id);
+      await this.activityService.unrecordSwipe(id);
       this._saved.next(this._saved.value.filter(e => e.id !== id));
     } catch (e) {
       console.error('Failed to remove saved item', e);

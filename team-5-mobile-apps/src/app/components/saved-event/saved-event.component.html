@@ -1,5 +1,6 @@
-<div class="saved-card-component">
-  <div class="thumb" [style.background-image]="'url(' + (event.image_url || event.image) + ')'" role="img" aria-label="{{event.name}}"></div>
+<div class="saved-card-component" (click)="openDetails()">
+  <div class="thumb" [style.background-image]="'url(' + (event.image_url || event.image) + ')'" role="img"
+    aria-label="{{event.name}}"></div>
   <div class="info">
     <div class="row top">
       <h3>{{ event.name }}</h3>
@@ -7,7 +8,7 @@
         <button class="icon-btn star" (click)="toggleStar($event)" [attr.aria-pressed]="event.starred">
           <ion-icon [name]="event.starred ? 'star' : 'star-outline'"></ion-icon>
         </button>
-        
+
         <button class="icon-btn heart" (click)="remove($event)" aria-label="Remove saved">
           <ion-icon name="heart" color="success"></ion-icon>
         </button>
@@ -28,7 +29,7 @@
 
     <div class="friends-slot">
       <ion-skeleton-text *ngIf="loadingFriends" animated style="width: 60%; height: 12px;"></ion-skeleton-text>
-      
+
       <p class="friends" *ngIf="!loadingFriends && friendsCount > 0">
         {{ friendsCount }} {{ friendsCount === 1 ? 'friend is' : 'friends are' }} interested
         <ion-icon name="people-circle" color="tertiary"></ion-icon>

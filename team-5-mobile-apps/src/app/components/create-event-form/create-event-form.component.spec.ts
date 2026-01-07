@@ -1,36 +1,39 @@
-import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, waitForAsync, tick } from '@angular/core/testing';
 import { CreateEventFormComponent } from './create-event-form.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
+import { ActivityService } from '../../services/activity.service';
+import { InterestService } from '../../services/interest.service';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
-
-// Mock SupabaseService
-class MockSupabaseService {
-  getAllInterests = jasmine.createSpy().and.returnValue(Promise.resolve([
-    { id: 1, name: 'Sports' },
-    { id: 2, name: 'Music' }
-  ]));
-  createActivity = jasmine.createSpy().and.returnValue(Promise.resolve());
-}
-
-// Mock Router
-class MockRouter {
-  navigate = jasmine.createSpy();
-}
 
 describe('CreateEventFormComponent', () => {
   let component: CreateEventFormComponent;
   let fixture: ComponentFixture<CreateEventFormComponent>;
-  let supabase: MockSupabaseService;
-  let router: MockRouter;
+
+  let supabaseSpy: jasmine.SpyObj<SupabaseService>;
+  let activityServiceSpy: jasmine.SpyObj<ActivityService>;
+  let interestServiceSpy: jasmine.SpyObj<InterestService>;
+  let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(waitForAsync(() => {
+    supabaseSpy = jasmine.createSpyObj('SupabaseService', ['getCurrentUser']);
+    activityServiceSpy = jasmine.createSpyObj('ActivityService', ['createActivity']);
+    interestServiceSpy = jasmine.createSpyObj('InterestService', ['getAllInterests']);
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+
+    interestServiceSpy.getAllInterests.and.returnValue(Promise.resolve([
+      { id: '1', name: 'Sports' },
+      { id: '2', name: 'Music' }
+    ]));
+    activityServiceSpy.createActivity.and.returnValue(Promise.resolve());
+
     TestBed.configureTestingModule({
       imports: [CreateEventFormComponent, ReactiveFormsModule],
       providers: [
-        { provide: SupabaseService, useClass: MockSupabaseService },
-        { provide: Router, useClass: MockRouter }
+        { provide: SupabaseService, useValue: supabaseSpy },
+        { provide: ActivityService, useValue: activityServiceSpy },
+        { provide: InterestService, useValue: interestServiceSpy },
+        { provide: Router, useValue: routerSpy }
       ]
     }).compileComponents();
   }));
@@ -38,24 +41,24 @@ describe('CreateEventFormComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateEventFormComponent);
     component = fixture.componentInstance;
-    supabase = TestBed.inject(SupabaseService) as any;
-    router = TestBed.inject(Router) as any;
-    fixture.detectChanges();
   });
 
-  //test that the component actually gets created
+
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  //
-  it('should load categories on init', async () => {
-    await component.ngOnInit();
-    expect(supabase.getAllInterests).toHaveBeenCalled();
+  it('should load categories on init', fakeAsync(() => {
+    fixture.detectChanges();
+    tick();
+
+    expect(interestServiceSpy.getAllInterests).toHaveBeenCalled();
     expect(component.categories.length).toBeGreaterThan(0);
-  });
+    expect(component.categories[0].name).toBe('Sports');
+  }));
 
   it('should mark all fields as touched if form is invalid on submit', () => {
+    fixture.detectChanges();
     spyOn(component.form, 'markAllAsTouched');
     component.form.patchValue({ name: '' });
     component.submit();
@@ -63,6 +66,7 @@ describe('CreateEventFormComponent', () => {
   });
 
   it('should call createActivity and navigate on valid submit', fakeAsync(async () => {
+    fixture.detectChanges();
     component.form.patchValue({
       name: 'Test Event',
       category: '1',
@@ -73,14 +77,18 @@ describe('CreateEventFormComponent', () => {
       location: 'Test Location',
       image: null
     });
+
     await component.submit();
-    expect(supabase.createActivity).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/tabs/explore']);
+
+    expect(activityServiceSpy.createActivity).toHaveBeenCalled();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/tabs/explore']);
   }));
 
   it('should show alert and not navigate on createActivity error', fakeAsync(async () => {
-    supabase.createActivity.and.returnValue(Promise.reject(new Error('Failed')));
+    fixture.detectChanges();
+    activityServiceSpy.createActivity.and.returnValue(Promise.reject(new Error('Failed')));
     spyOn(window, 'alert');
+
     component.form.patchValue({
       name: 'Test Event',
       category: '1',
@@ -91,29 +99,35 @@ describe('CreateEventFormComponent', () => {
       location: 'Test Location',
       image: null
     });
+
     await component.submit();
+
     expect(window.alert).toHaveBeenCalledWith(jasmine.stringMatching('Error creating event'));
-    expect(router.navigate).not.toHaveBeenCalled();
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
   }));
 
   it('should validate minParticipants <= maxParticipants', () => {
+    fixture.detectChanges();
     component.form.patchValue({ minParticipants: 10, maxParticipants: 2 });
     expect(component.form.errors).toEqual({ minGreaterThanMax: true });
   });
 
   it('should update date on onDateChange', () => {
+    fixture.detectChanges();
     const date = new Date().toISOString();
     component.onDateChange({ detail: { value: date } });
     expect(component.form.value.date).toBe(date);
   });
 
   it('should set image to null if no file selected', () => {
+    fixture.detectChanges();
     const event = { target: { files: [] } } as any;
     component.onFileChange(event);
     expect(component.form.value.image).toBeNull();
   });
 
   it('should set image to file if file selected', () => {
+    fixture.detectChanges();
     const file = new File([''], 'test.png', { type: 'image/png' });
     const event = { target: { files: [file] } } as any;
     component.onFileChange(event);

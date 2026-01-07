@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ activity?.name }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="header-image" [style.background-image]="'url(' + (activity?.image_url || activity?.image) + ')'" *ngIf="activity?.image_url || activity?.image"></div>
+  
+  <div class="details-section">
+    <h1>{{ activity?.name }}</h1>
+    
+    <div class="meta-row">
+       <ion-icon name="calendar-outline"></ion-icon>
+       <span>{{ (activity?.activity_date || activity?.date) | date:'mediumDate' }}</span>
+       <span class="spacer">•</span>
+       <ion-icon name="time-outline"></ion-icon>
+       <span>{{ (activity?.activity_date || activity?.date) | date:'shortTime' }}</span>
+    </div>
+
+    <div class="meta-row">
+        <ion-icon name="location-outline"></ion-icon>
+        <span>{{ activity?.location }}</span>
+    </div>
+
+    <p class="description">{{ activity?.description }}</p>
+
+    <div class="creator-section" *ngIf="creator">
+        <h3>Organizer</h3>
+        <ion-item lines="none">
+            <ion-avatar slot="start">
+                <img [src]="'https://api.dicebear.com/7.x/initials/svg?seed=' + creator.username" />
+            </ion-avatar>
+            <ion-label>
+                <h2>{{ creator.full_name }}</h2>
+                <p>@{{ creator.username }}</p>
+            </ion-label>
+        </ion-item>
+    </div>
+
+    <div class="participants-section">
+        <h3>Participants ({{ participants.length }})</h3>
+        
+        <div class="loading-spinner" *ngIf="loading">
+            <ion-spinner></ion-spinner>
+        </div>
+
+        <ion-list *ngIf="!loading">
+            <ion-item *ngFor="let p of participants">
+                <ion-avatar slot="start">
+                   <img [src]="'https://api.dicebear.com/7.x/initials/svg?seed=' + (p.username || 'user')" />
+                </ion-avatar>
+                <ion-label>
+                    <h2>{{ p.full_name }}</h2>
+                    <p>@{{ p.username }}</p>
+                </ion-label>
+            </ion-item>
+            <ion-item *ngIf="participants.length === 0" lines="none">
+                <ion-label color="medium">No participants yet.</ion-label>
+            </ion-item>
+        </ion-list>
+    </div>
+
+  </div>
+</ion-content>

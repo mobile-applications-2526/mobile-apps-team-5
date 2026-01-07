@@ -7,6 +7,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SupabaseService } from '../../services/supabase.service';
+import { ChatService } from '../../services/chat.service';
 import { addIcons } from 'ionicons';
 import { send } from 'ionicons/icons';
 
@@ -35,7 +36,8 @@ export class ChatDetailPage implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
-        private supabase: SupabaseService
+        private supabase: SupabaseService,
+        private chatService: ChatService
     ) {
         addIcons({ send });
     }
@@ -46,8 +48,8 @@ export class ChatDetailPage implements OnInit {
 
         this.roomId = this.route.snapshot.paramMap.get('id') || '';
         if (this.roomId) {
-            await this.supabase.markRoomRead(this.roomId);
-            this.messages = await this.supabase.getMessages(this.roomId);
+            await this.chatService.markRoomRead(this.roomId);
+            this.messages = await this.chatService.getMessages(this.roomId);
             this.scrollToBottom();
         }
     }
@@ -58,8 +60,8 @@ export class ChatDetailPage implements OnInit {
         this.newMessage = '';
 
         try {
-            await this.supabase.sendMessage(this.roomId, msg);
-            this.messages = await this.supabase.getMessages(this.roomId);
+            await this.chatService.sendMessage(this.roomId, msg);
+            this.messages = await this.chatService.getMessages(this.roomId);
             this.scrollToBottom();
         } catch (error) {
             console.error('Failed to send', error);
