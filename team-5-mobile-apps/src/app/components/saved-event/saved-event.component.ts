@@ -1,9 +1,10 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { SupabaseService } from 'src/app/services/supabase.service';
 import { FriendService } from 'src/app/services/friend.service';
 import { ActivityService } from 'src/app/services/activity.service';
+import { ActivityDetailsComponent } from '../activity-details/activity-details.component';
 
 @Component({
   selector: 'app-saved-event',
@@ -23,7 +24,8 @@ export class SavedEventComponent implements OnInit {
   constructor(
     private supabase: SupabaseService,
     private friendService: FriendService,
-    private activityService: ActivityService
+    private activityService: ActivityService,
+    private modalCtrl: ModalController
   ) { }
 
   async ngOnInit() {
@@ -37,6 +39,16 @@ export class SavedEventComponent implements OnInit {
       this.actualParticipants = pCount;
       this.loadingFriends = false;
     }
+  }
+
+  async openDetails() {
+    const modal = await this.modalCtrl.create({
+      component: ActivityDetailsComponent,
+      componentProps: {
+        activity: this.event
+      }
+    });
+    await modal.present();
   }
 
   async remove(ev?: Event) {

@@ -414,4 +414,38 @@ export class ActivityService {
             }
         }
     }
+
+    async getActivityById(id: string) {
+        const { data, error } = await this.supabase.client
+            .from('activities')
+            .select('*, interest (name)')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async getActivityParticipants(activityId: string) {
+        const { data, error } = await this.supabase.client
+            .from('activity_swipes')
+            .select('user_id')
+            .eq('swipe', activityId)
+            .eq('liked', true);
+
+        if (error) {
+            console.error('Error fetching participants:', error);
+            return [];
+        }
+
+        if (!data || data.length === 0) return [];
+
+        const userIds = data.map((x: any) => x.user_id);
+        const { data: profiles } = await this.supabase.client
+            .from('profiles')
+            .select('*')
+            .in('id', userIds);
+
+        return profiles || [];
+    }
 }

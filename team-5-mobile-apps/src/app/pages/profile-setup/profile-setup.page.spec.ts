@@ -5,31 +5,33 @@ import { provideRouter, Router } from '@angular/router';
 
 import { ProfileSetupPage } from './profile-setup.page';
 import { SupabaseService } from '../../services/supabase.service';
-
+import { ProfileService } from '../../services/profile.service';
+import { InterestService } from '../../services/interest.service';
 
 
 describe('ProfileSetupPage', () => {
   let fixture: ComponentFixture<ProfileSetupPage>;
   let component: ProfileSetupPage;
   let supabaseSpy: jasmine.SpyObj<SupabaseService>;
+  let profileServiceSpy: jasmine.SpyObj<ProfileService>;
+  let interestServiceSpy: jasmine.SpyObj<InterestService>;
   let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
-     supabaseSpy = jasmine.createSpyObj('SupabaseService', [
-      'completeProfile',
-      'getAllInterests',
-      'updateUserInterests',
-    ]);
+    supabaseSpy = jasmine.createSpyObj('SupabaseService', ['signIn']);
+    profileServiceSpy = jasmine.createSpyObj('ProfileService', ['completeProfile']);
+    interestServiceSpy = jasmine.createSpyObj('InterestService', ['getAllInterests', 'updateUserInterests']);
     routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 
-    // default behaviours so tests don't crash
-    supabaseSpy.getAllInterests.and.returnValue(Promise.resolve([]));
-    supabaseSpy.updateUserInterests.and.returnValue(Promise.resolve());
+    interestServiceSpy.getAllInterests.and.returnValue(Promise.resolve([]));
+    interestServiceSpy.updateUserInterests.and.returnValue(Promise.resolve());
 
     await TestBed.configureTestingModule({
       imports: [IonicModule.forRoot(), ProfileSetupPage],
       providers: [
         { provide: SupabaseService, useValue: supabaseSpy },
+        { provide: ProfileService, useValue: profileServiceSpy },
+        { provide: InterestService, useValue: interestServiceSpy },
         { provide: Router, useValue: routerSpy },
       ],
     }).compileComponents();
@@ -39,48 +41,42 @@ describe('ProfileSetupPage', () => {
     fixture.detectChanges();
   });
 
-  //test to check that the profile setup component gets created
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  //test to check if firstname or lastname are missing gives an error
   it('shows alert if firstName or lastName missing', async () => {
     spyOn(window, 'alert');
     component.firstName = '';
     component.lastName = '';
     await component.onComplete();
     expect(window.alert).toHaveBeenCalledWith('Please enter your First Name and Surname.');
-    expect(supabaseSpy.completeProfile).not.toHaveBeenCalled();
+    expect(profileServiceSpy.completeProfile).not.toHaveBeenCalled();
   });
 
-  //test succesful case
   it('calls completeProfile, updates interests and navigates on success', async () => {
     component.firstName = 'John';
     component.lastName = 'Doe';
     component.bio = 'Hello!';
 
-    // no validation on interests, so empty is fine
-    supabaseSpy.completeProfile.and.returnValue(Promise.resolve());
+    profileServiceSpy.completeProfile.and.returnValue(Promise.resolve());
 
     await component.onComplete();
 
-    expect(supabaseSpy.completeProfile)
+    expect(profileServiceSpy.completeProfile)
       .toHaveBeenCalledWith('John', 'Doe', 'Hello!');
 
-    // interests should still be updated (likely with an empty array)
-    expect(supabaseSpy.updateUserInterests).toHaveBeenCalled();
+    expect(interestServiceSpy.updateUserInterests).toHaveBeenCalled();
 
     expect(routerSpy.navigateByUrl)
       .toHaveBeenCalledWith('/tabs/explore', { replaceUrl: true });
   });
 
-  //test error case
   it('shows alert on error from completeProfile', async () => {
     component.firstName = 'Jane';
     component.lastName = 'Doe';
     component.bio = 'Bio';
-    supabaseSpy.completeProfile.and.returnValue(Promise.reject(new Error('fail')));
+    profileServiceSpy.completeProfile.and.returnValue(Promise.reject(new Error('fail')));
     spyOn(window, 'alert');
     await component.onComplete();
     expect(window.alert).toHaveBeenCalledWith('Error saving profile: fail');
