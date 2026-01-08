@@ -1,4 +1,4 @@
-<ion-header class="ion-no-border">
+<ion-header class="keep-header">
     <ion-toolbar>
       <ion-title>Profile Setup</ion-title>
     </ion-toolbar>
@@ -6,7 +6,7 @@
   
   <ion-content class="ion-padding">
   
-    <div style="text-align: center; margin-top: 20px; margin-bottom: 30px;">
+    <div style="text-align: center; margin-top: 15px; margin-bottom: 30px;">
       <h2>Confirm your details</h2>
       <p style="color: gray;">Let's complete your profile so others can find you!</p>
     </div>
@@ -31,7 +31,7 @@
     </ion-item>
 
     <!-- interests section -->
-    <div style="margin-top: 24px;">
+    <div style="margin-top: 24px; margin-left: 16px;">
       <h3 style="margin-bottom: 8px;">Interests</h3>
 
       <!-- Loading state -->
@@ -42,7 +42,7 @@
         </ion-skeleton-text>
       </div>
 
-      <div *ngIf="!loadingInterests">
+      <div *ngIf="!loadingInterests" class="interest-grid">
         <ion-item lines="none" *ngFor="let interest of allInterests">
           <ion-checkbox
             slot="start"

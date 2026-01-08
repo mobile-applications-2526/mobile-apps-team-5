@@ -1,0 +1,38 @@
+.modal-content {
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 10px;
+  margin-top: 35px;
+}
+
+p {
+  color: var(--ion-color-medium-dark);
+  margin-bottom: 24px;
+}
+
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.decline-button {
+  --background: var(--ion-color-dark);
+  --color: var(--ion-color-light);
+  size: small;
+}
+
+.confirm-button {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-dark);
+}
+
+.decide-later-btn {
+  margin-bottom: 30px;
+  color: var(--ion-color-medium-dark);
+  font-size: 0.9rem;
+  text-decoration: underline;
+}

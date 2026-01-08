@@ -1,14 +1,15 @@
 /* Mobile-first responsive form styles */
 .create-form-wrap {
-  width: 100%;
-  padding: 10px;
+  padding: 10x;
+  margin-left: 10px;
+  margin-right: 10px;
   box-sizing: border-box;
   max-width: 720px; /* keeps it constrained on tablets/desktop */
-  margin: 0 auto;
 }
 
 .create-form-wrap ion-card {
   margin: 0;
+  padding: 4px;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -101,4 +102,11 @@
   .create-form-wrap ion-label {
     font-size: 0.85rem;
   }
+}
+
+ion-card-title {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 10px;
 }

@@ -3,7 +3,7 @@
     aria-label="{{event.name}}"></div>
   <div class="info">
     <div class="row top">
-      <h3>{{ event.name }}</h3>
+      <h3 class="event-name">{{ event.name }}</h3>
       <div class="icons">
         <button class="icon-btn star" (click)="toggleStar($event)" [attr.aria-pressed]="event.starred">
           <ion-icon [name]="event.starred ? 'star' : 'star-outline'"></ion-icon>
