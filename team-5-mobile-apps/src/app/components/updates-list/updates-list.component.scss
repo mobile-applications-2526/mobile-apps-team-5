@@ -14,10 +14,34 @@
   align-items: center;
   justify-content: center;
   padding: 40px;
-  color: var(--ion-color-medium);
+  color: var(--ion-color-medium-dark);
 
   ion-icon {
     font-size: 48px;
     margin-bottom: 16px;
   }
+}
+
+ion-list {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.notification-icon {
+  margin-right: 10px;
+}
+
+ion-item ion-label {
+  display: flex;
+  flex-direction: column;
+}
+
+/* push timestamp to the right */
+.timestamp {
+  align-self: flex-end;
+  margin-top: 4px;
+  margin-right: 2px;
+  font-size: 0.75rem;
+  color: var(--ion-color-medium-dark);
+  white-space: nowrap;
 }

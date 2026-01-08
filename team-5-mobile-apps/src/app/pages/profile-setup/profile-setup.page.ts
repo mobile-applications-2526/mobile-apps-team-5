@@ -23,6 +23,7 @@ import {
 @Component({
   selector: 'app-profile-setup',
   templateUrl: './profile-setup.page.html',
+  styleUrls: ['profile-setup.page.scss'],
   standalone: true,
   imports: [
     CommonModule,

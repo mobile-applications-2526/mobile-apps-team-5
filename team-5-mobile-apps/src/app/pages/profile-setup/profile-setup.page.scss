@@ -1,0 +1,17 @@
+.interest-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.interest-grid ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --padding-end: 0;
+}
+
+ion-content {
+    --padding-start: 20px;
+    --padding-end: 30px;
+}
+

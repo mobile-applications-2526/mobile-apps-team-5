@@ -2,7 +2,7 @@
   <ion-searchbar placeholder="Search by username"></ion-searchbar>
 
   <!-- Incoming Requests -->
-  <div class="suggestions-label" *ngIf="(requests$ | async)?.length">
+  <div class="suggestions-label" *ngIf="(requests$ | async)?.length" class="sections-label">
     Incoming Requests
   </div>
   <ion-list lines="none" *ngIf="(requests$ | async)?.length">
@@ -19,7 +19,7 @@
     </ion-item>
   </ion-list>
 
-  <div class="suggestions-label">Suggestions</div>
+  <div class="suggestions-label" class="sections-label">Suggestions</div>
   <ion-list lines="none">
     <ion-item *ngFor="let s of suggestions$ | async" lines="none">
       <ion-avatar slot="start" class="avatar">

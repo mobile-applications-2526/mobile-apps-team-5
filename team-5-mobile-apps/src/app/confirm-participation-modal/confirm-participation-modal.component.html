@@ -1,0 +1,26 @@
+<ion-content class="ion-padding modal-content">
+  <h2>Confirm Participation for <br> {{ eventName }}</h2>
+
+  <p>
+    Do you want to confirm your participation? This will add you to the group chat
+    if enough people confirm.
+  </p>
+
+  <div class="action-row">
+    <ion-button expand="block" class="decline-button" size="medium" (click)="decline()">
+      Decline
+    </ion-button>
+
+    <ion-button expand="block" class="confirm-button" size="medium" (click)="confirm()">
+      Confirm
+    </ion-button>
+  </div>
+
+  <ion-button
+    fill="clear"
+    size="medium"
+    class="decide-later-btn"
+    (click)="close()">
+    Decide later
+  </ion-button>
+</ion-content>

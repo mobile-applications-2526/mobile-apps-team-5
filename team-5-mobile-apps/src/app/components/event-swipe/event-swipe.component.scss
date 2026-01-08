@@ -13,7 +13,7 @@
 .empty-state {
   text-align: center;
   margin-top: 50%;
-  color: var(--ion-color-medium);
+  color: var(--ion-color-medium-dark);
 }
 
 /* --- CARD --- */
@@ -133,12 +133,12 @@
 }
 
 .circle-btn {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: white;
   border: none;
-  box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.3);
   display: flex;
   align-items: center;
   justify-content: center;

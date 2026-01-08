@@ -43,16 +43,16 @@
           <small>Description must be at least 10 characters.</small>
         </ion-text>
 
-        <div class="participants" style="display: flex; gap: 10px; margin-top: 10px;">
+        <div class="participants" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
           <div class="col" style="flex: 1;">
             <ion-item lines="none">
-              <ion-label position="stacked">Min</ion-label>
+              <ion-label position="stacked">Min participants</ion-label>
               <ion-input type="number" formControlName="minParticipants"></ion-input>
             </ion-item>
           </div>
           <div class="col" style="flex: 1;">
             <ion-item lines="none">
-              <ion-label position="stacked">Max</ion-label>
+              <ion-label position="stacked">Max participants</ion-label>
               <ion-input type="number" formControlName="maxParticipants"></ion-input>
             </ion-item>
           </div>
@@ -62,33 +62,39 @@
         </ion-text>
 
         <ion-item class="ion-margin-bottom">
-          <ion-label position="stacked">Date proposal</ion-label>
-          
-          <ion-datetime-button datetime="datetime-picker"></ion-datetime-button>
-          
-          <ion-modal [keepContentsMounted]="true">
-            <ng-template>
-              <ion-datetime 
-                id="datetime-picker" 
-                presentation="date-time"
-                [showDefaultButtons]="true"
-                [preferWheel]="true"
-                [value]="form.get('date')?.value"
-                (ionChange)="onDateChange($event)">
-              </ion-datetime>
-            </ng-template>
-          </ion-modal>
-        </ion-item>
-        <ion-text color="danger" *ngIf="f['date'].touched && f['date'].errors?.['required']">
-          <small>Date is required.</small>
-        </ion-text>
+  <ion-label position="stacked">Date proposal</ion-label>
+
+  <ion-datetime-button
+    id="open-date-modal"
+    datetime="datetime-picker">
+  </ion-datetime-button>
+
+  <ion-modal trigger="open-date-modal" [keepContentsMounted]="true">
+    <ng-template>
+      <ion-datetime
+        id="datetime-picker"
+        presentation="date-time"
+        [showDefaultButtons]="true"
+        [preferWheel]="false"
+        [value]="form.get('date')?.value"
+        (ionChange)="onDateChange($event)">
+      </ion-datetime>
+    </ng-template>
+  </ion-modal>
+</ion-item>
+
+
+<ion-text color="danger" *ngIf="f['date'].touched && f['date'].errors?.['required']">
+  <small>Date is required.</small>
+</ion-text>
+
 
         <ion-item class="ion-margin-bottom">
           <ion-label position="stacked">Image (Optional)</ion-label>
           <input type="file" accept="image/*" (change)="onFileChange($event)" />
         </ion-item>
 
-        <div class="actions" style="margin-top: 20px;">
+        <div class="actions" style="margin-top: 20px; margin-bottom: 20px;">
           <ion-button expand="block" type="submit" class="submit" [disabled]="loading">
             <span *ngIf="!loading">Post Activity Proposal</span>
             <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>

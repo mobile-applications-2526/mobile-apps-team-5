@@ -1,12 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { IonicModule, AlertController, ModalController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { UpdatesStore, UpdateItem } from '../../store/updates.store';
 import { addIcons } from 'ionicons';
 import { personAdd, chatbubbles, time, flame, closeCircle, checkmarkCircle, checkmarkDoneCircle } from 'ionicons/icons';
 import { ActivityService } from '../../services/activity.service';
+import { ConfirmParticipationModalComponent } from '../../confirm-participation-modal/confirm-participation-modal.component';
 
 @Component({
   selector: 'app-updates-list',
@@ -23,7 +24,8 @@ export class UpdatesListComponent implements OnInit, OnDestroy {
     private store: UpdatesStore,
     private router: Router,
     private alertCtrl: AlertController,
-    private activityService: ActivityService
+    private activityService: ActivityService,
+    private modalCtrl: ModalController
   ) {
     addIcons({ personAdd, chatbubbles, time, flame, closeCircle, checkmarkCircle, checkmarkDoneCircle });
   }
@@ -45,40 +47,38 @@ export class UpdatesListComponent implements OnInit, OnDestroy {
     } else if (item.type === 'EVENT_REMINDER' || item.type === 'EVENT_POPULAR') {
       this.router.navigate(['/tabs/saved']);
     } else if (item.type === 'ACTIVITY_CONFIRMATION') {
-      const alert = await this.alertCtrl.create({
-        header: 'Confirm Participation',
-        message: 'Do you want to confirm your participation? This will add you to the group chat if enough people confirm.',
-        buttons: [
-          {
-            text: 'Decline',
-            role: 'destructive',
-            handler: async () => {
-              try {
-                await this.activityService.removeSavedActivity(item.data.activityId);
-                this.store.loadUpdates();
-              } catch (e) {
-                console.error('Error declining:', e);
-              }
-            }
-          },
-          {
-            text: 'Decide Later',
-            role: 'cancel'
-          },
-          {
-            text: 'Confirm',
-            handler: async () => {
-              try {
-                await this.activityService.confirmActivityParticipation(item.data.activityId);
-                this.store.loadUpdates();
-              } catch (e) {
-                console.error('Error confirming:', e);
-              }
-            }
-          }
-        ]
+      let eventName = '';
+    try {
+      const activity = await this.activityService.getActivityById(item.data.activityId);
+      eventName = activity?.name ?? 'Confirm Participation';
+    } catch (e) {
+      eventName = 'Confirm Participation';
+    }
+ 
+      const modal = await this.modalCtrl.create({
+        component: ConfirmParticipationModalComponent,
+        componentProps: {
+          eventName: eventName
+        },
+        cssClass: 'confirm-popup',
+        breakpoints: [0, 0.40],
+        initialBreakpoint: 0.40,
+        backdropDismiss: true
       });
-      await alert.present();
+      await modal.present();
+
+
+const { data } = await modal.onWillDismiss();
+
+if (data === 'decline') {
+  await this.activityService.removeSavedActivity(item.data.activityId);
+  this.store.loadUpdates();
+}
+
+if (data === 'confirm') {
+  await this.activityService.confirmActivityParticipation(item.data.activityId);
+  this.store.loadUpdates();
+}
     }
   }
 
